@@ -7,6 +7,7 @@ import Form from "react-bootstrap/Form";
 const PRIMARY_COLOR = "#cc5c99";
 const SECONDARY_COLOR = "#0c0c1f";
 const url = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/signup`;
+
 const Register = () => {
   const [data, setData] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
@@ -44,9 +45,13 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { response: res } = await axios.post(url, data);
-      const {accessToken} = res;
+      const { data: res } = await axios.post(url, data);
+      const { accessToken } = res;
 
+      // Show confirmation window
+      window.alert("Registration successful! Please log in.");
+      
+      // Navigate to the login page
       navigate("/login");
     } catch (error) {
       if (
@@ -102,9 +107,9 @@ const Register = () => {
                     onChange={handleChange}
                   />
                 </Form.Group>
-                <div class="form-check form-switch">
+                <div className="form-check form-switch">
                   <input
-                    class="form-check-input"
+                    className="form-check-input"
                     type="checkbox"
                     id="flexSwitchCheckDefault"
                     onChange={() => {
@@ -112,9 +117,8 @@ const Register = () => {
                     }}
                   />
                   <label
-                    class="form-check-label"
-                    for="flexSwitchCheckDefault"
-                    className="text-muted"
+                    className="form-check-label text-muted"
+                    htmlFor="flexSwitchCheckDefault"
                   >
                     {bgText}
                   </label>
