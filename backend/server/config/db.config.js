@@ -7,10 +7,10 @@ module.exports = () => {
         useNewUrlParser: true,
         useUnifiedTopology: true
     }
-    try{
+    try {
         mongoose.connect(process.env.DB_URL)
         console.log("The backend has connected to the MongoDB database.")
-    } catch(error){
+    } catch (error) {
         console.log(`${error} could not connect`)
     }
 }

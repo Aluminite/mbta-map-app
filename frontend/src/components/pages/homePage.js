@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import getUserInfo from '../../utilities/decodeJwt';
 
 const HomePage = () => {
@@ -20,7 +20,7 @@ const HomePage = () => {
         <div><h4>Log in to view this page.</h4></div>
     );
 
-    const { id, email, username } = user;
+    const {id, email, username} = user;
 
     return (
         <>

@@ -5,6 +5,6 @@ const newUserModel = require('../models/userModel')
 router.get('/getAll', async (req, res) => {
     const user = await newUserModel.find();
     return res.json(user)
-  })
+})
 
-  module.exports = router;
+module.exports = router;
