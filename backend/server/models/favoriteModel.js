@@ -3,10 +3,10 @@ const mongoose = require("mongoose");
 //user schema/model
 const favoriteSchema = new mongoose.Schema(
     {
-        owner: {
+        ownerId: {
             type: String,
             required: true,
-            label: "owner",
+            label: "ownerId",
         },
         route: {
             type: String,
