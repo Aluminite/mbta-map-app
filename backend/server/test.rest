@@ -70,3 +70,8 @@ Content-Type: application/json
 
 ###
 POST  http://localhost:8081/user/deleteAll
+Content-Type: application/json
+
+###
+POST  http://localhost:8081/favorite/deleteAllFavorite
+Content-Type: application/json
