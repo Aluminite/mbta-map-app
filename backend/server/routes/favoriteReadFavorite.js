@@ -4,8 +4,7 @@ const z = require("zod");
 
 const newFavoriteModel = require("../models/favoriteModel");
 
-router.get("/getFavoriteById", async (req, res) => {
-    var {favoriteId} = req.body;
+router.get("/getFavoriteById/:favoriteId", async (req, res) => {
 
     newFavoriteModel.findById(favoriteId, function (err, favorite) {
         if (err) {
