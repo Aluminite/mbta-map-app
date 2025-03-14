@@ -21,7 +21,7 @@ const favoriteSchema = new mongoose.Schema(
             default: Date.now,
         },
     },
-    {collection: "users"}
+    {collection: "favorites"}
 );
 
 module.exports = mongoose.model('favorites', favoriteSchema)
