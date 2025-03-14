@@ -19,9 +19,11 @@ router.post('/editFavorite', async (req, res) => {
         ownerId: ownerId,
         route: route,
         station: station
-    }, function (err) {
+    }, function (err, favorite) {
         if (err) {
             console.log(err);
+        } else {
+            return res.json(favorite);
         }
     });
 

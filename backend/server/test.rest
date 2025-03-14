@@ -22,12 +22,11 @@ GET http://localhost:8081/user/getAll
 Content-Type: application/json
 
 ###
-
 POST http://localhost:8081/user/editUser
 Content-Type: application/json 
 
 {
-    "userId" : "635ab8dfc407faf9f73deaf2",
+    "userId" : "67d4634b26893332736331b6",
     "username" : "Tochi Edit",
     "password" : "dwwrwr"
 }
@@ -45,7 +44,7 @@ GET  http://localhost:8081/user/getUserById
 Content-Type: application/json 
 
 {
-    "userId" : "634edb2a16710b2cda6fb370"
+    "userId" : "67d4634b26893332736331b6"
 }
 
 ###
@@ -53,19 +52,24 @@ POST  http://localhost:8081/favorite/newFavorite
 Content-Type: application/json
 
 {
-    "ownerId": "635ab8dfc407faf9f73deaf2",
-    "route": "CR-Newburyport",
-    "station": "place-ER-0168"
+    "ownerId" : "67d4634b26893332736331b6",
+    "route" : "CR-Newburyport",
+    "station" : "place-ER-0168"
 }
 
 ###
-GET  http://localhost:8081/favorite/getFavoriteById/67d4551c180365084492d0ab
+GET  http://localhost:8081/favorite/getFavoriteById/67d4638626893332736331bd
+Content-Type: application/json
+
+###
+POST http://localhost:8081/favorite/editFavorite
 Content-Type: application/json
 
 {
-    "ownerId": "635ab8dfc407faf9f73deaf2",
-    "route": "CR-Newburyport",
-    "station": "place-ER-0168"
+    "favoriteId" : "67d4638626893332736331bd",
+    "ownerId" : "67d4634b26893332736331b6",
+    "route" : "Red",
+    "station" : "place-sstat"
 }
 
 ###
