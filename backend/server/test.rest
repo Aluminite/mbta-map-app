@@ -49,4 +49,24 @@ Content-Type: application/json
 }
 
 ###
+POST  http://localhost:8081/favorite/newFavorite
+Content-Type: application/json
+
+{
+    "ownerId": "635ab8dfc407faf9f73deaf2",
+    "route": "CR-Newburyport",
+    "station": "place-ER-0168"
+}
+
+###
+GET  http://localhost:8081/favorite/getFavoriteById/67d4551c180365084492d0ab
+Content-Type: application/json
+
+{
+    "ownerId": "635ab8dfc407faf9f73deaf2",
+    "route": "CR-Newburyport",
+    "station": "place-ER-0168"
+}
+
+###
 POST  http://localhost:8081/user/deleteAll
