@@ -13,6 +13,7 @@ import Signup from "./components/pages/registerPage";
 import PrivateUserProfile from "./components/pages/privateUserProfilePage";
 import {createContext, useState, useEffect} from "react";
 import getUserInfo from "./utilities/decodeJwt";
+import MbtaMap from "./components/pages/mbtaMapPage";
 
 export const UserContext = createContext();
 //test change
@@ -31,6 +32,7 @@ const App = () => {
                 <Routes>
                     <Route exact path="/" element={<LandingPage/>}/>
                     <Route exact path="/home" element={<HomePage/>}/>
+                    <Route exact path="/map" element={<MbtaMap/>}/>
                     <Route exact path="/login" element={<Login/>}/>
                     <Route exact path="/signup" element={<Signup/>}/>
                     <Route path="/privateUserProfile" element={<PrivateUserProfile/>}/>
