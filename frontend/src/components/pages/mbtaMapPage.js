@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useContext} from 'react';
-import {MapContainer, TileLayer, Marker, Popup, useMap, Polyline} from 'react-leaflet'
+import React from 'react';
+import {MapContainer, TileLayer, Polyline} from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import {decode} from "@googlemaps/polyline-codec";
 
