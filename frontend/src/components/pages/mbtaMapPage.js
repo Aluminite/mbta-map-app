@@ -36,8 +36,10 @@ const MbtaMap = () => {
     function handleRouteChange({currentTarget: dropdown}) {
         selectedRoute.current = transitRoutes.find((route) => route.id === dropdown.value);
         setCurrentPolyline([]);
-        setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
         updateRouteVehicles(selectedRoute.current);
+        if (selectedRoute.current != null) {
+            setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
+        }
     }
 
     function updateRouteVehicles(route) {
