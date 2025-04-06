@@ -1,13 +1,16 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {MapContainer, TileLayer, CircleMarker} from 'react-leaflet';
+import {MapContainer, TileLayer, CircleMarker, Polyline} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
+import {decode} from "@googlemaps/polyline-codec";
 
 const MbtaMap = () => {
     const [transitRoutes, setTransitRoutes] = useState([]);
     const [routeVehicles, setRouteVehicles] = useState([]);
     const selectedRoute = useRef(null);
+    const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
+    const [currentPolyline, setCurrentPolyline] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -32,6 +35,8 @@ const MbtaMap = () => {
 
     function handleRouteChange({currentTarget: dropdown}) {
         selectedRoute.current = transitRoutes.find((route) => route.id === dropdown.value);
+        setCurrentPolyline([]);
+        setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
         updateRouteVehicles(selectedRoute.current);
     }
 
@@ -50,6 +55,29 @@ const MbtaMap = () => {
         } else {
             setRouteVehicles([]);
         }
+    }
+
+    function findPolyline(tripID) {
+        async function fetchData() {
+            const result = await axios(
+                'https://api-v3.mbta.com/trips/' + tripID
+            );
+            return result.data;
+        }
+
+        fetchData().then((response) => {
+            async function fetchData() {
+                const result = await axios(
+                    'https://api-v3.mbta.com/shapes/' + response.data.relationships.shape.data.id
+                );
+                return result.data;
+            }
+
+            fetchData().then((response) => {
+                const decoded = decode(response.data.attributes.polyline)
+                setCurrentPolyline(decoded);
+            })
+        });
     }
 
     return (
@@ -92,9 +120,14 @@ const MbtaMap = () => {
                     {routeVehicles.map(vehicle => (
                         <CircleMarker key={vehicle.id}
                                       center={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                      pathOptions={{color: "#" + selectedRoute.current.attributes["color"]}}
-                                      radius={10}></CircleMarker>
+                                      pathOptions={currentColor}
+                                      radius={10} eventHandlers={{
+                            click: () => {
+                                findPolyline(vehicle.relationships.trip.data.id);
+                            },
+                        }}></CircleMarker>
                     ))}
+                    <Polyline pathOptions={currentColor} positions={currentPolyline}></Polyline>
                 </MapContainer>
             </div>
         </div>
