@@ -11,7 +11,6 @@ const MbtaMap = () => {
     const selectedRoute = useRef(null);
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentPolyline, setCurrentPolyline] = useState([]);
-    const [routeTypeFilter, setRouteTypeFilter] = useState("all");
 
     useEffect(() => {
         async function fetchData() {
@@ -21,8 +20,8 @@ const MbtaMap = () => {
             return result.data;
         }
 
-        fetchData().then((response) => {
-            setTransitRoutes(response.data);
+        fetchData().then((routes) => {
+            setTransitRoutes(routes.data);
         });
 
         const interval = setInterval(() => {
@@ -33,6 +32,19 @@ const MbtaMap = () => {
             clearInterval(interval);
         }
     }, []);
+
+    function handleTypeChange({currentTarget: dropdown}) {
+        async function fetchData() {
+            const result = await axios(
+                'https://api-v3.mbta.com/routes?filter%5Btype%5D=' + dropdown.value
+            );
+            return result.data;
+        }
+
+        fetchData().then((routes) => {
+            setTransitRoutes(routes.data);
+        });
+    }
 
     function handleRouteChange({currentTarget: dropdown}) {
         selectedRoute.current = transitRoutes.find((route) => route.id === dropdown.value);
@@ -52,8 +64,8 @@ const MbtaMap = () => {
                 return result.data;
             }
 
-            fetchData().then((response) => {
-                setRouteVehicles(response.data);
+            fetchData().then((vehicles) => {
+                setRouteVehicles(vehicles.data);
             });
         } else {
             setRouteVehicles([]);
@@ -68,95 +80,82 @@ const MbtaMap = () => {
             return result.data;
         }
 
-        fetchData().then((response) => {
+        fetchData().then((trip) => {
             async function fetchData() {
                 const result = await axios(
-                    'https://api-v3.mbta.com/shapes/' + response.data.relationships.shape.data.id
+                    'https://api-v3.mbta.com/shapes/' + trip.data.relationships.shape.data.id
                 );
                 return result.data;
             }
 
-            fetchData().then((response) => {
-                const decoded = decode(response.data.attributes.polyline)
+            fetchData().then((shape) => {
+                const decoded = decode(shape.data.attributes.polyline)
                 setCurrentPolyline(decoded);
             })
         });
     }
 
     return (
-        <div>
-            <Form.Select
-                    style={{ marginBottom: "10px", width: "300px", border: "2px solid #ccc"}}
-                    onChange={(e) => setRouteTypeFilter(e.target.value)}
-                    >
-                        <option value={null}>Choose Route Type</option>
-                        <option value="all">All Types</option>
-                        <option value="0">Light Rail</option>
-                        <option value="1">Subway</option>
-                        <option value="2">Commuter Rail</option>
-                        <option value="3">Bus</option>
-                        <option value="4">Ferry</option>
-                    </Form.Select>
-                    
-            <Form.Select 
-                onChange={handleRouteChange}
-                style={{
-                    border: '2px solid #ccc',
-                    borderRadius: '4px',
-                    padding: '8px',
-                    width: '100%',
-                    maxWidth: '300px',
-                    marginBottom: '1rem',
-                }}
-                >
-                <option value={null}>Choose Route</option>
-                {transitRoutes
-                .filter(route => routeTypeFilter === "all" || route.attributes["type"].toString() === routeTypeFilter)
-                .map(route => {
-                    let name = "";
-                    switch (route.attributes["type"]) {
-                        case 0:
-                        case 1:
-                            name = "Subway: " + route.attributes["long_name"];
-                            break;
-                        case 2:
-                            name = "Commuter Rail: " + route.attributes["long_name"];
-                            break;
-                        case 3:
-                            name = "Bus: " + route.attributes["short_name"] + " - " + route.attributes["long_name"];
-                            break;
-                        case 4:
-                            name = "Ferry: " + route.attributes["long_name"];
-                            break;
-                        default:
+        <div className="map-page-container">
+            <div className="dropdowns">
+                <Form.Select onChange={handleTypeChange}>
+                    <option value="">All Route Types</option>
+                    <option value="0,1">Subway</option>
+                    <option value="2">Commuter Rail</option>
+                    <option value="3">Bus</option>
+                    <option value="4">Ferry</option>
+                </Form.Select>
+                <Form.Select onChange={handleRouteChange}>
+                    <option value="">Choose Route</option>
+                    {transitRoutes.map(route => {
+                        let name = "";
+                        switch (route.attributes["type"]) {
+                            case 0:
+                            case 1:
+                                name = "Subway: " + route.attributes["long_name"];
+                                break;
+                            case 2:
+                                name = "Commuter Rail: " + route.attributes["long_name"];
+                                break;
+                            case 3:
+                                name = "Bus: " + route.attributes["short_name"] + " - " + route.attributes["long_name"];
+                                break;
+                            case 4:
+                                name = "Ferry: " + route.attributes["long_name"];
+                                break;
+                            default:
+                        }
+                        return (
+                            <option key={route.id} value={route.id}>
+                                {name}
+                            </option>
+                        );
+                    })
                     }
-                    return (
-                        <option key={route.id} value={route.id}>
-                            {name}
-                        </option>
-                    );
-                })}
-            </Form.Select>
-            <div className="map">
-                <MapContainer center={[42.359149, -71.0581643]} zoom={10} scrollWheelZoom={true}>
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}"
-                        ext="png"
-                        minZoom={8}
-                    />
-                    {routeVehicles.map(vehicle => (
-                        <CircleMarker key={vehicle.id}
-                                      center={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                      pathOptions={currentColor}
-                                      radius={10} eventHandlers={{
-                            click: () => {
-                                findPolyline(vehicle.relationships.trip.data.id);
-                            },
-                        }}></CircleMarker>
-                    ))}
-                    <Polyline pathOptions={currentColor} positions={currentPolyline}></Polyline>
-                </MapContainer>
+                </Form.Select>
+            </div>
+            <div className="map-container">
+                <div className="map">
+                    <MapContainer center={[42.359149, -71.0581643]} zoom={10} scrollWheelZoom={true}>
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}"
+                            ext="png"
+                            minZoom={8}
+                        />
+                        {routeVehicles.map(vehicle => (
+                            <CircleMarker key={vehicle.id}
+                                          center={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+                                          pathOptions={currentColor}
+                                          radius={10} eventHandlers={{
+                                click: () => {
+                                    findPolyline(vehicle.relationships.trip.data.id);
+                                },
+                            }}></CircleMarker>
+                        ))}
+                        <Polyline pathOptions={currentColor} positions={currentPolyline}></Polyline>
+                    </MapContainer>
+                </div>
             </div>
         </div>
     )

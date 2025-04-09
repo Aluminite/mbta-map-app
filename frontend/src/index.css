@@ -2,9 +2,39 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-page-container {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    background: green;
+}
+
+.dropdowns {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.map-container {
+    flex: 1 1 auto;
+    background: red;
+}
+
 .map {
-    height: 600px;
-    width: 1000px;
+    height: 100%;
+    width: 100%;
     background-color: rgb(125, 193, 220);
     display: flex;
     flex-direction: row;
