@@ -18,29 +18,25 @@ body,
     display: flex;
     flex-flow: column;
     height: 100%;
-    background: green;
 }
 
-.dropdowns {
+.dropdown-container {
     flex: 0 1 auto;
     display: flex;
     flex-direction: row;
 }
 
+.dropdown {
+    border-radius: 0 !important;
+}
+
 .map-container {
     flex: 1 1 auto;
-    background: red;
 }
 
 .map {
     height: 100%;
     width: 100%;
-    background-color: rgb(125, 193, 220);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    color: whitesmoke;
 }
 
 .leaflet-container {

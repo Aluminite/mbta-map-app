@@ -97,15 +97,15 @@ const MbtaMap = () => {
 
     return (
         <div className="map-page-container">
-            <div className="dropdowns">
-                <Form.Select onChange={handleTypeChange}>
+            <div className="dropdown-container">
+                <Form.Select className="dropdown" onChange={handleTypeChange}>
                     <option value="">All Route Types</option>
                     <option value="0,1">Subway</option>
                     <option value="2">Commuter Rail</option>
                     <option value="3">Bus</option>
                     <option value="4">Ferry</option>
                 </Form.Select>
-                <Form.Select onChange={handleRouteChange}>
+                <Form.Select className="dropdown" onChange={handleRouteChange}>
                     <option value="">Choose Route</option>
                     {transitRoutes.map(route => {
                         let name = "";
