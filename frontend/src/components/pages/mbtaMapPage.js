@@ -11,6 +11,7 @@ const MbtaMap = () => {
     const selectedRoute = useRef(null);
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentPolyline, setCurrentPolyline] = useState([]);
+    const [routeTypeFilter, setRouteTypeFilter] = useState("all");
 
     useEffect(() => {
         async function fetchData() {
@@ -84,9 +85,34 @@ const MbtaMap = () => {
 
     return (
         <div>
-            <Form.Select onChange={handleRouteChange}>
-                <option value={null}>Choose route</option>
-                {transitRoutes.map(route => {
+            <Form.Select
+                    style={{ marginBottom: "10px", width: "300px", border: "2px solid #ccc"}}
+                    onChange={(e) => setRouteTypeFilter(e.target.value)}
+                    >
+                        <option value={null}>Choose Route Type</option>
+                        <option value="all">All Types</option>
+                        <option value="0">Light Rail</option>
+                        <option value="1">Subway</option>
+                        <option value="2">Commuter Rail</option>
+                        <option value="3">Bus</option>
+                        <option value="4">Ferry</option>
+                    </Form.Select>
+                    
+            <Form.Select 
+                onChange={handleRouteChange}
+                style={{
+                    border: '2px solid #ccc',
+                    borderRadius: '4px',
+                    padding: '8px',
+                    width: '100%',
+                    maxWidth: '300px',
+                    marginBottom: '1rem',
+                }}
+                >
+                <option value={null}>Choose Route</option>
+                {transitRoutes
+                .filter(route => routeTypeFilter === "all" || route.attributes["type"].toString() === routeTypeFilter)
+                .map(route => {
                     let name = "";
                     switch (route.attributes["type"]) {
                         case 0:
