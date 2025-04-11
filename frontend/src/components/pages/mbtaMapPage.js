@@ -13,16 +13,7 @@ const MbtaMap = () => {
     const [currentPolyline, setCurrentPolyline] = useState([]);
 
     useEffect(() => {
-        async function fetchData() {
-            const result = await axios(
-                'https://api-v3.mbta.com/routes'
-            );
-            return result.data;
-        }
-
-        fetchData().then((routes) => {
-            setTransitRoutes(routes.data);
-        });
+        getRoutes("");
 
         const interval = setInterval(() => {
             updateRouteVehicles(selectedRoute.current);
@@ -34,9 +25,13 @@ const MbtaMap = () => {
     }, []);
 
     function handleTypeChange({currentTarget: dropdown}) {
+        getRoutes(dropdown.value);
+    }
+
+    function getRoutes(filter) {
         async function fetchData() {
             const result = await axios(
-                'https://api-v3.mbta.com/routes?filter%5Btype%5D=' + dropdown.value
+                'https://api-v3.mbta.com/routes?filter%5Btype%5D=' + filter
             );
             return result.data;
         }
