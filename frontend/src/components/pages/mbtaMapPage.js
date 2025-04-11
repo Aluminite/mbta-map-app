@@ -1,16 +1,17 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {MapContainer, TileLayer, CircleMarker, Polyline, Marker} from 'react-leaflet';
+import {MapContainer, TileLayer, Polyline, Marker} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
 import {decode} from "@googlemaps/polyline-codec";
-import leaflet from "leaflet";
+import {generateVehicleIcon, generateHeadingIcon} from '../../utilities/icons';
 
 const MbtaMap = () => {
     const [transitRoutes, setTransitRoutes] = useState([]);
     const [routeVehicles, setRouteVehicles] = useState([]);
     const selectedRoute = useRef(null);
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
+    const [currentVehicleIcon, setCurrentVehicleIcon] = useState("");
     const [currentPolyline, setCurrentPolyline] = useState([]);
 
     useEffect(() => {
@@ -48,6 +49,8 @@ const MbtaMap = () => {
         updateRouteVehicles(selectedRoute.current);
         if (selectedRoute.current != null) {
             setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
+            setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
+                "#" + selectedRoute.current.attributes["color"]));
         }
     }
 
@@ -140,30 +143,19 @@ const MbtaMap = () => {
                             minZoom={8}
                         />
                         <Polyline pathOptions={currentColor} positions={currentPolyline}></Polyline>
-                        {routeVehicles.map(vehicle => {
-                            const transform = "transform='rotate(" + vehicle.attributes.bearing + ",24,24)'";
-                            const color = currentColor.color;
-                            const headingIcon = leaflet.divIcon({
-                                className: "transparent-bg", iconAnchor: [24, 24],
-                                html: '<svg width="48" height="48">' +
-                                    '<polygon points="24,0 28,10 20,10" ' +
-                                    'style="stroke: #202020; stroke-width: 0.7; fill:' + color + '" '
-                                    + transform + '/></svg>'
-                            });
-                            return (
-                                <CircleMarker key={vehicle.id}
-                                              center={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                              pathOptions={currentColor}
-                                              radius={10} eventHandlers={{
+                        {routeVehicles.map(vehicle => (
+                                <Marker key={vehicle.id}
+                                              position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+                                              icon={currentVehicleIcon} eventHandlers={{
                                     click: () => {
                                         findPolyline(vehicle.relationships.trip.data.id);
                                     },
                                 }}>
                                     <Marker position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                           icon={headingIcon} eventHandlers={{}} interactive={false}></Marker>
-                                </CircleMarker>
-                            );
-                        })}
+                                           icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
+                                            interactive={false}></Marker>
+                                </Marker>
+                        ))}
                     </MapContainer>
                 </div>
             </div>
