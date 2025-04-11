@@ -47,3 +47,7 @@ body,
 .leaflet-control-attribution {
     font-size: 10px;
 }
+
+.transparent-bg {
+    background: transparent;
+}
