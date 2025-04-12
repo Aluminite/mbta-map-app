@@ -142,7 +142,7 @@ const MbtaMap = () => {
                             ext="png"
                             minZoom={8}
                         />
-                        <Polyline pathOptions={currentColor} positions={currentPolyline}></Polyline>
+                        <Polyline pathOptions={currentColor} positions={currentPolyline}> interactive={false}</Polyline>
                         {routeVehicles.map(vehicle => (
                             <Marker key={vehicle.id}
                                     position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
@@ -151,11 +151,11 @@ const MbtaMap = () => {
                                     findPolyline(vehicle.relationships.trip.data.id);
                                 },
                             }}>
-
-                                {vehicle.attributes.bearing != null ? <Marker // The API returns null for the bearing sometimes, so we need to check
-                                    position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                    icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
-                                    interactive={false}></Marker> : <div></div>}
+                                {vehicle.attributes.bearing != null ?
+                                    <Marker // The API returns null for the bearing sometimes, so we need to check
+                                        position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+                                        icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
+                                        interactive={false}></Marker> : null}
                             </Marker>
                         ))}
                     </MapContainer>
