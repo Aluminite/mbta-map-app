@@ -35,7 +35,8 @@ function generateVehicleIcon(type, color) {
 function generateHeadingIcon(heading, color) {
     const transform = "rotate(" + heading + ",24,24)";
     const style = {stroke: "#202020", strokeWidth: 0.7, fill: color};
-    let icon = <svg width="48" height="48"><polygon points="24,0 28,10 20,10" style={style} transform={transform} /></svg>;
+    const icon = <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><polygon points="24,0 28,10 20,10" style={style} transform={transform} /></svg>;
+    
     return leaflet.divIcon({className: "transparent-bg", iconAnchor: [24, 24], html: renderToStaticMarkup(icon)});
 }
 
