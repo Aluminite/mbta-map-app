@@ -1,17 +1,19 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {MapContainer, TileLayer, Polyline, Marker} from 'react-leaflet';
+import {MapContainer, TileLayer, Polyline, Marker, Circle, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
 import {decode} from "@googlemaps/polyline-codec";
 import {generateVehicleIcon, generateHeadingIcon} from '../../utilities/icons';
+import leaflet from 'leaflet';
 
 const MbtaMap = () => {
     const [transitRoutes, setTransitRoutes] = useState([]);
     const [routeVehicles, setRouteVehicles] = useState([]);
     const selectedRoute = useRef(null);
+    const [routeStops, setRouteStops] = useState([]);
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
-    const [currentVehicleIcon, setCurrentVehicleIcon] = useState("");
+    const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
 
     useEffect(() => {
@@ -47,6 +49,7 @@ const MbtaMap = () => {
         selectedRoute.current = transitRoutes.find((route) => route.id === dropdown.value);
         setCurrentPolyline([]);
         updateRouteVehicles(selectedRoute.current);
+        getStops(selectedRoute.current);
         if (selectedRoute.current != null) {
             setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
             setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
@@ -92,6 +95,39 @@ const MbtaMap = () => {
                 setCurrentPolyline(decoded);
             })
         });
+    }
+
+    function currentServiceDate() {
+        // JS does not provide a proper way of getting the date in a specific time zone.
+        // This is a crap way of doing it, but it should work and doesn't require a library.
+        const date = new Date(new Date().toLocaleString('en', {timeZone: 'America/New_York'}));
+        if (date.getHours() < 3) {
+            // If it's before 3:00AM, it's part of the previous service date.
+            date.setDate(date.getDate() - 1);
+        }
+
+        const year = date.getFullYear().toString().padStart(4, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function getStops(route) {
+        if (route != null) {
+            async function fetchData() {
+                const result = await axios(
+                    `https://api-v3.mbta.com/stops?filter%5Bdate%5D=${currentServiceDate()}&filter%5Broute%5D=${route.id}`
+                );
+                return result.data;
+            }
+
+            fetchData().then((stops) => {
+                setRouteStops(stops.data);
+            });
+        } else {
+            setRouteStops([]);
+        }
     }
 
     return (
@@ -143,6 +179,15 @@ const MbtaMap = () => {
                             minZoom={8}
                         />
                         <Polyline pathOptions={currentColor} positions={currentPolyline}> interactive={false}</Polyline>
+                        {routeStops.map(stop => (
+                            <Circle key={stop.id}
+                                    center={[stop.attributes.latitude, stop.attributes.longitude]}
+                                    pathOptions={{color: "#CCCCCC"}} radius={10}>
+                                <Popup>
+                                    {stop.attributes.name}
+                                </Popup>
+                            </Circle>
+                        ))}
                         {routeVehicles.map(vehicle => (
                             <Marker key={vehicle.id}
                                     position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
