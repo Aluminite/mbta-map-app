@@ -79,3 +79,31 @@ Content-Type: application/json
 ###
 POST  http://localhost:8081/favorite/deleteAllFavorite
 Content-Type: application/json
+
+### Get vehicles for a route WORKING
+GET http://localhost:8081/api/vehicles/1
+Content-Type: application/json
+
+### Get trips for a route WORKING SLOWLY
+GET http://localhost:8081/api/trips/Red
+Content-Type: application/json
+
+### Get shape info by route ID WORKKING 
+GET http://localhost:8081/api/shapes/Red
+Content-Type: application/json
+
+### Get all mbta routes WORKING
+GET http://localhost:8081/api/routes
+Content-Type: application/json
+
+### Get subway routes WORKING
+GET http://localhost:8081/api/routes?type=1
+Content-Type: application/json
+
+### Get stops by route ID WORKING
+GET http://localhost:8081/api/stops?routeId=Orange
+Content-Type: application/json
+
+### Get stops by route and date WORKING
+GET http://localhost:8081/api/stops?routeId=Red&date=2025-04-17
+Content-Type: application/json
