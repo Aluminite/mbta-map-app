@@ -136,7 +136,7 @@ const MbtaMap = () => {
         if (stop != null) {
             async function fetchData() {
                 const result = await axios(
-                    `https://api-v3.mbta.com/predictions?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time&filter%5Bstop%5D=${stop.id}&filter%5Broute%5D=${route.id}`
+                    `https://api-v3.mbta.com/predictions?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time%2Cdirection_id&filter%5Bstop%5D=${stop.id}&filter%5Broute%5D=${route.id}`
                 );
                 return result.data;
             }
@@ -147,9 +147,12 @@ const MbtaMap = () => {
         }
     }
 
-    function findCorrectPredictionTime(predictions) {
+    function findCorrectPredictionTime(predictions, direction) {
         let predictionDate = null;
         predictions.some((prediction) => {
+            if (prediction.attributes.direction_id !== direction) {
+                return false;
+            }
             // Finds the first valid prediction that's in the future
             if (prediction.attributes.arrival_time !== null) {
                 const arrivalTime = new Date(prediction.attributes.arrival_time);
@@ -168,14 +171,18 @@ const MbtaMap = () => {
                     return false;
                 }
             }
-            return false;
         })
 
         if (predictionDate === null) {
-            return null;
+            return "No prediction towards " + selectedRoute.current.attributes.direction_destinations[direction];
         } else {
-            return "Next arriving at " +
-                predictionDate.getHours().toString() + ":" +predictionDate.getMinutes().toString().padStart(2, '0');
+            let hours = (predictionDate.getHours() % 12).toString()
+            if (hours === "0") hours = "12";
+            let minutes = predictionDate.getMinutes().toString().padStart(2, '0');
+            let ampm = Math.floor(predictionDate.getHours() / 12) === 0 ? "AM" : "PM";
+            const timeString = hours + ":" + minutes + " " + ampm;
+            return "Next to " + selectedRoute.current.attributes.direction_destinations[direction] +
+                " at " + timeString;
         }
     }
 
@@ -228,21 +235,29 @@ const MbtaMap = () => {
                             minZoom={8}
                         />
                         <Polyline pathOptions={currentColor} positions={currentPolyline}> interactive={false}</Polyline>
-                        {routeStops.map(stop => (
-                            <Circle key={stop.id}
-                                    center={[stop.attributes.latitude, stop.attributes.longitude]}
-                                    pathOptions={{color: "#CCCCCC"}} radius={10} eventHandlers={{
-                                click: () => {
-                                    getStopPredictions(stop, selectedRoute.current);
-                                },
-                            }}>
-                                <Popup>
-                                    {stop.attributes.name}<br/>
-                                    {stopPredictions.has(stop.id) ?
-                                        findCorrectPredictionTime(stopPredictions.get(stop.id)) : null}
-                                </Popup>
-                            </Circle>
-                        ))}
+                        {routeStops.map(stop => {
+                            let direction0Prediction = null;
+                            let direction1Prediction = null;
+                            if (stopPredictions.has(stop.id)) {
+                                direction0Prediction = findCorrectPredictionTime(stopPredictions.get(stop.id), 0);
+                                direction1Prediction = findCorrectPredictionTime(stopPredictions.get(stop.id), 1);
+                            }
+                            return (
+                                <Circle key={stop.id}
+                                        center={[stop.attributes.latitude, stop.attributes.longitude]}
+                                        pathOptions={{color: "#CCCCCC"}} radius={10} eventHandlers={{
+                                    click: () => {
+                                        getStopPredictions(stop, selectedRoute.current);
+                                    },
+                                }}>
+                                    <Popup>
+                                        {stop.attributes.name}<br/>
+                                        {direction0Prediction}{direction1Prediction !== null ? <br/> : null}
+                                        {direction1Prediction}
+                                    </Popup>
+                                </Circle>
+                            );
+                        })}
                         {routeVehicles.map(vehicle => (
                             <Marker key={vehicle.id}
                                     position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
