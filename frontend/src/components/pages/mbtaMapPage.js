@@ -132,12 +132,11 @@ const MbtaMap = () => {
         }
     }
 
-    function getStopPredictions(stop) {
+    function getStopPredictions(stop, route) {
         if (stop != null) {
             async function fetchData() {
                 const result = await axios(
-                    'https://api-v3.mbta.com/predictions' +
-                    '?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time&filter%5Bstop%5D=' + stop.id
+                    `https://api-v3.mbta.com/predictions?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time&filter%5Bstop%5D=${stop.id}&filter%5Broute%5D=${route.id}`
                 );
                 return result.data;
             }
@@ -234,7 +233,7 @@ const MbtaMap = () => {
                                     center={[stop.attributes.latitude, stop.attributes.longitude]}
                                     pathOptions={{color: "#CCCCCC"}} radius={10} eventHandlers={{
                                 click: () => {
-                                    getStopPredictions(stop);
+                                    getStopPredictions(stop, selectedRoute.current);
                                 },
                             }}>
                                 <Popup>
