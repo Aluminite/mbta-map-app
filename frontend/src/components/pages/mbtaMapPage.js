@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {useMap} from "@uidotdev/usehooks";
 import {MapContainer, TileLayer, Polyline, Marker, Circle, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
@@ -12,6 +13,7 @@ const MbtaMap = () => {
     const [routeVehicles, setRouteVehicles] = useState([]);
     const selectedRoute = useRef(null);
     const [routeStops, setRouteStops] = useState([]);
+    const stopPredictions = useMap();
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
@@ -130,6 +132,54 @@ const MbtaMap = () => {
         }
     }
 
+    function getStopPredictions(stop) {
+        if (stop != null) {
+            async function fetchData() {
+                const result = await axios(
+                    'https://api-v3.mbta.com/predictions' +
+                    '?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time&filter%5Bstop%5D=' + stop.id
+                );
+                return result.data;
+            }
+
+            fetchData().then((predictions) => {
+                stopPredictions.set(stop.id, predictions.data)
+            });
+        }
+    }
+
+    function findCorrectPredictionTime(predictions) {
+        let predictionDate = null;
+        predictions.some((prediction) => {
+            // Finds the first valid prediction that's in the future
+            if (prediction.attributes.arrival_time !== null) {
+                const arrivalTime = new Date(prediction.attributes.arrival_time);
+                if (arrivalTime >= (Date.now() - 60000)) { // Gives 60 seconds of leeway
+                    predictionDate = arrivalTime;
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (prediction.attributes.departure_time !== null) {
+                const departureTime = new Date(prediction.attributes.departure_time);
+                if (departureTime >= (Date.now() - 60000)) {
+                    predictionDate = departureTime;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        })
+
+        if (predictionDate === null) {
+            return null;
+        } else {
+            return "Next arriving at " +
+                predictionDate.getHours().toString() + ":" +predictionDate.getMinutes().toString().padStart(2, '0');
+        }
+    }
+
     return (
         <div className="map-page-container">
             <div className="dropdown-container">
@@ -182,9 +232,15 @@ const MbtaMap = () => {
                         {routeStops.map(stop => (
                             <Circle key={stop.id}
                                     center={[stop.attributes.latitude, stop.attributes.longitude]}
-                                    pathOptions={{color: "#CCCCCC"}} radius={10}>
+                                    pathOptions={{color: "#CCCCCC"}} radius={10} eventHandlers={{
+                                click: () => {
+                                    getStopPredictions(stop);
+                                },
+                            }}>
                                 <Popup>
-                                    {stop.attributes.name}
+                                    {stop.attributes.name}<br/>
+                                    {stopPredictions.has(stop.id) ?
+                                        findCorrectPredictionTime(stopPredictions.get(stop.id)) : null}
                                 </Popup>
                             </Circle>
                         ))}
