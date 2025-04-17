@@ -51,3 +51,7 @@ body,
 .transparent-bg {
     background: transparent;
 }
+
+.leaflet-control-locate-location circle {
+    animation: none !important;
+}

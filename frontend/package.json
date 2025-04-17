@@ -15,6 +15,7 @@
     "i": "^0.3.7",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.9.4",
+    "leaflet.locatecontrol": "^0.84.1",
     "moment": "^2.29.4",
     "postcss": "^8.4.47",
     "react": "^18.2.0",
