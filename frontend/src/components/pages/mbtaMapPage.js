@@ -13,6 +13,7 @@ const MbtaMap = () => {
     const [routeVehicles, setRouteVehicles] = useState([]);
     const selectedRoute = useRef(null);
     const [routeStops, setRouteStops] = useState([]);
+    const [routeStopChildren, setRouteStopChildren] = useState([]);
     const stopPredictions = useMap();
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
@@ -119,13 +120,14 @@ const MbtaMap = () => {
         if (route != null) {
             async function fetchData() {
                 const result = await axios(
-                    `https://api-v3.mbta.com/stops?filter%5Bdate%5D=${currentServiceDate()}&filter%5Broute%5D=${route.id}`
+                    `https://api-v3.mbta.com/stops?include=child_stops&filter%5Bdate%5D=${currentServiceDate()}&filter%5Broute%5D=${route.id}`
                 );
                 return result.data;
             }
 
             fetchData().then((stops) => {
                 setRouteStops(stops.data);
+                setRouteStopChildren(stops.included);
             });
         } else {
             setRouteStops([]);
@@ -145,6 +147,14 @@ const MbtaMap = () => {
                 stopPredictions.set(stop.id, predictions.data)
             });
         }
+    }
+
+    function dateToUSTime(date) {
+        let hours = (date.getHours() % 12).toString()
+        if (hours === "0") hours = "12";
+        let minutes = date.getMinutes().toString().padStart(2, '0');
+        let ampm = Math.floor(date.getHours() / 12) === 0 ? "AM" : "PM";
+        return hours + ":" + minutes + " " + ampm;
     }
 
     function findCorrectPredictionTime(predictions, direction) {
@@ -171,18 +181,42 @@ const MbtaMap = () => {
                     return false;
                 }
             }
+            return false;
         })
 
         if (predictionDate === null) {
-            return "No prediction towards " + selectedRoute.current.attributes.direction_destinations[direction];
+            return "No prediction to " + selectedRoute.current.attributes.direction_destinations[direction];
         } else {
-            let hours = (predictionDate.getHours() % 12).toString()
-            if (hours === "0") hours = "12";
-            let minutes = predictionDate.getMinutes().toString().padStart(2, '0');
-            let ampm = Math.floor(predictionDate.getHours() / 12) === 0 ? "AM" : "PM";
-            const timeString = hours + ":" + minutes + " " + ampm;
             return "Next to " + selectedRoute.current.attributes.direction_destinations[direction] +
-                " at " + timeString;
+                " at " + dateToUSTime(predictionDate);
+        }
+    }
+
+    function findRealStop(stopID) {
+        let foundStop = routeStops.find((stop) => stop.id === stopID);
+        if (foundStop !== undefined) {
+            return foundStop;
+        } else {
+            foundStop = routeStopChildren.find((stop) => stop.id === stopID);
+            if (foundStop !== undefined) {
+                const parent = routeStops.find((stop) => stop.id === foundStop.relationships.parent_station.data.id);
+                if (parent !== undefined) {
+                    return parent;
+                } else return null;
+            } else return null;
+        }
+    }
+
+    function statusFriendlyName(status) {
+        switch (status) {
+            case "INCOMING_AT":
+                return "Arriving at";
+            case "STOPPED_AT":
+                return "Stopped at";
+            case "IN_TRANSIT_TO":
+                return "Going to";
+            default:
+                return "";
         }
     }
 
@@ -234,7 +268,7 @@ const MbtaMap = () => {
                             ext="png"
                             minZoom={8}
                         />
-                        <Polyline pathOptions={currentColor} positions={currentPolyline}> interactive={false}</Polyline>
+                        <Polyline pathOptions={currentColor} positions={currentPolyline} interactive={false}></Polyline>
                         {routeStops.map(stop => {
                             let direction0Prediction = null;
                             let direction1Prediction = null;
@@ -258,21 +292,33 @@ const MbtaMap = () => {
                                 </Circle>
                             );
                         })}
-                        {routeVehicles.map(vehicle => (
-                            <Marker key={vehicle.id}
-                                    position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                    icon={currentVehicleIcon} eventHandlers={{
-                                click: () => {
-                                    findPolyline(vehicle.relationships.trip.data.id);
-                                },
-                            }}>
-                                {vehicle.attributes.bearing != null ?
-                                    <Marker // The API returns null for the bearing sometimes, so we need to check
+                        {routeVehicles.map(vehicle => {
+                            const realStop = findRealStop(vehicle.relationships.stop.data.id);
+                            let realStopName = "unknown";
+                            if (realStop !== null) {
+                                realStopName = realStop.attributes.name;
+                            }
+                            const status = statusFriendlyName(vehicle.attributes.current_status);
+                            return (
+                                <Marker key={vehicle.id}
                                         position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                        icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
-                                        interactive={false}></Marker> : null}
-                            </Marker>
-                        ))}
+                                        icon={currentVehicleIcon} eventHandlers={{
+                                    click: () => {
+                                        findPolyline(vehicle.relationships.trip.data.id);
+                                    },
+                                }}>
+                                    {vehicle.attributes.bearing != null ?
+                                        <Marker // The API returns null for the bearing sometimes, so we need to check
+                                            position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+                                            icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
+                                            interactive={false}></Marker> : null}
+                                    <Popup>
+                                        Vehicle {vehicle.attributes.label}<br/>
+                                        {status} {realStopName}
+                                    </Popup>
+                                </Marker>
+                            );
+                        })}
                     </MapContainer>
                 </div>
             </div>
