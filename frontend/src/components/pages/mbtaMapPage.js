@@ -20,7 +20,7 @@ const MbtaMap = () => {
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
-    const locationAdded =  useRef(false);
+    const locationAdded = useRef(false);
 
     useEffect(() => {
         getRoutes("");
@@ -41,7 +41,7 @@ const MbtaMap = () => {
     function getRoutes(filter) {
         async function fetchData() {
             const result = await axios(
-                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes/` + filter 
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes/` + filter
             );
             return result.data;
         }
@@ -231,17 +231,16 @@ const MbtaMap = () => {
 
     function LocationMarker() {
         const map = useLeafletMap();
-        useEffect(() => {
-            if (!locationAdded.current) {
-                const control = new LocateControl({
-                    keepCurrentZoomLevel: true,
-                    locateOptions: {
-                        enableHighAccuracy: true
-                    }});
-                map.addControl(control);
-                locationAdded.current = true;
-            }
-        }, []);
+        if (!locationAdded.current) {
+            const control = new LocateControl({
+                keepCurrentZoomLevel: true,
+                locateOptions: {
+                    enableHighAccuracy: true
+                }
+            });
+            map.addControl(control);
+            locationAdded.current = true;
+        }
         return null;
     }
 
@@ -293,8 +292,8 @@ const MbtaMap = () => {
                             ext="png"
                             minZoom={8}
                         />
-                        <LocationMarker />
-                        <Polyline pathOptions={currentColor} positions={currentPolyline} interactive={false} />
+                        <LocationMarker/>
+                        <Polyline pathOptions={currentColor} positions={currentPolyline} interactive={false}/>
                         {routeStops.map(stop => {
                             let direction0Prediction = null;
                             let direction1Prediction = null;
@@ -340,9 +339,9 @@ const MbtaMap = () => {
                                         <Marker // The API returns null for the bearing sometimes, so we need to check
                                             position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
                                             icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
-                                            interactive={false} /> : null}
+                                            interactive={false}/> : null}
                                     <Popup>
-                                        Vehicle {vehicle.attributes.label}<br />
+                                        Vehicle {vehicle.attributes.label}<br/>
                                         {status} {realStopName}
                                     </Popup>
                                 </Marker>
