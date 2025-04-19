@@ -196,6 +196,12 @@ const MbtaMap = () => {
     }
 
     function findRealStop(stopID) {
+        // Due to race conditions, one of the states might be currently undefined
+        // Checking to avoid an exception
+        if (routeStops === undefined || routeStopChildren === undefined) {
+            return null;
+        }
+
         let foundStop = routeStops.find((stop) => stop.id === stopID);
         if (foundStop !== undefined) {
             return foundStop;
@@ -219,7 +225,7 @@ const MbtaMap = () => {
             case "IN_TRANSIT_TO":
                 return "Going to";
             default:
-                return "";
+                return "Unknown status to";
         }
     }
 
@@ -313,7 +319,10 @@ const MbtaMap = () => {
                             );
                         })}
                         {routeVehicles.map(vehicle => {
-                            const realStop = findRealStop(vehicle.relationships.stop.data.id);
+                            let realStop = null;
+                            if (vehicle.relationships.stop.data !== null) {
+                                realStop = findRealStop(vehicle.relationships.stop.data.id);
+                            }
                             let realStopName = "unknown";
                             if (realStop !== null) {
                                 realStopName = realStop.attributes.name;
