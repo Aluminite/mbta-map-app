@@ -41,7 +41,7 @@ const MbtaMap = () => {
     function getRoutes(filter) {
         async function fetchData() {
             const result = await axios(
-                'https://api-v3.mbta.com/routes?filter%5Btype%5D=' + filter
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes/` + filter 
             );
             return result.data;
         }
@@ -67,7 +67,7 @@ const MbtaMap = () => {
         if (route != null) {
             async function fetchData() {
                 const result = await axios(
-                    'https://api-v3.mbta.com/vehicles?filter%5Broute%5D=' + route.id
+                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/vehicles/` + route.id
                 );
                 return result.data;
             }
@@ -83,7 +83,7 @@ const MbtaMap = () => {
     function findPolyline(tripID) {
         async function fetchData() {
             const result = await axios(
-                'https://api-v3.mbta.com/trips/' + tripID
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/trips/` + tripID
             );
             return result.data;
         }
@@ -91,7 +91,7 @@ const MbtaMap = () => {
         fetchData().then((trip) => {
             async function fetchData() {
                 const result = await axios(
-                    'https://api-v3.mbta.com/shapes/' + trip.data.relationships.shape.data.id
+                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/shapes/` + trip.data.relationships.shape.data.id
                 );
                 return result.data;
             }
@@ -123,7 +123,7 @@ const MbtaMap = () => {
         if (route != null) {
             async function fetchData() {
                 const result = await axios(
-                    `https://api-v3.mbta.com/stops?include=child_stops&filter%5Bdate%5D=${currentServiceDate()}&filter%5Broute%5D=${route.id}`
+                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/stops/${currentServiceDate()}/${route.id}`
                 );
                 return result.data;
             }
@@ -141,7 +141,7 @@ const MbtaMap = () => {
         if (stop != null) {
             async function fetchData() {
                 const result = await axios(
-                    `https://api-v3.mbta.com/predictions?sort=time&fields%5Bprediction%5D=arrival_time%2Cdeparture_time%2Cdirection_id&filter%5Bstop%5D=${stop.id}&filter%5Broute%5D=${route.id}`
+                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/predictions/${stop.id}/${route.id}`
                 );
                 return result.data;
             }

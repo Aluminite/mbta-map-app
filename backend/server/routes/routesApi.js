@@ -2,15 +2,11 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 
-// GET /api/routes OR /api/routes?type=1
-router.get('/routes', async (req, res) => {
-  const { type } = req.query;
-  const url = type
-    ? `https://api-v3.mbta.com/routes?filter[type]=${type}`
-    : `https://api-v3.mbta.com/routes`;
+router.get('/routes/:type?', async (req, res) => {
+  const { type } = req.params
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(`https://api-v3.mbta.com/routes?api_key=${process.env.MBTA_API_KEY}&filter[type]=${type}`);
     res.json(response.data);
   } catch (error) {
     console.error("Failed to fetch route data:", error.message);

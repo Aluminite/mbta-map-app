@@ -17,6 +17,7 @@ const vehicleRoutes = require('./routes/vehicleApi')
 const tripsApi = require('./routes/tripApi')
 const tripShapesApi = require('./routes/tripShapeApi')
 const stopsApi = require('./routes/stopsApi')
+const predictionsApi = require('./routes/predictionsApi')
 
 require('dotenv').config();
 const SERVER_PORT = 8081
@@ -39,6 +40,7 @@ app.use('/api', vehicleRoutes)
 app.use('/api', tripsApi)
 app.use('/api', tripShapesApi)
 app.use('/api', stopsApi)
+app.use('/api', predictionsApi)
 
 app.listen(SERVER_PORT, (req, res) => {
     console.log(`The backend service is running on port ${SERVER_PORT} and waiting for requests.`);
