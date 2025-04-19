@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const z = require('zod')
 const bcrypt = require("bcrypt");
 const newUserModel = require('../models/userModel')
 const {newUserValidation} = require('../models/userValidator');
@@ -15,9 +14,11 @@ router.post('/editUser', async (req, res) => {
     const {userId, username, email, password} = req.body
 
     // check if username is available
-    const user = await newUserModel.findOne({username: username})
-    if (user) userIdReg = JSON.stringify(user._id).replace(/["]+/g, '')
-    if (user && userIdReg !== userId) return res.status(409).send({message: "Username is taken, pick another"})
+    let user = await newUserModel.findOne({username: username})
+    if (user) {
+        let userIdReg = JSON.stringify(user._id).replace(/"+/g, '')
+        if (userIdReg !== userId) return res.status(409).send({message: "Username is taken, pick another"})
+    }
 
     // generates the hash
     const generateHash = await bcrypt.genSalt(Number(10))
@@ -26,20 +27,20 @@ router.post('/editUser', async (req, res) => {
     const hashPassword = await bcrypt.hash(password, generateHash)
 
     // find and update user using stored information
-    newUserModel.findByIdAndUpdate(userId, {
-        username: username,
-        email: email,
-        password: hashPassword
-    }, function (err, user) {
-        if (err) {
-            console.log(err);
-        } else {
-            // create and send new access token to local storage
-            const accessToken = generateAccessToken(user._id, email, username, hashPassword)
-            res.header('Authorization', accessToken).send({accessToken: accessToken})
-        }
-    });
+    try {
+        user = await newUserModel.findByIdAndUpdate(userId, {
+            username: username,
+            email: email,
+            password: hashPassword
+        });
 
+        // create and send new access token to local storage
+        const accessToken = generateAccessToken(user._id, email, username, hashPassword)
+        res.header('Authorization', accessToken).send({accessToken: accessToken})
+    } catch (err) {
+        console.log(err);
+        res.status(400).send(err);
+    }
 })
 
 module.exports = router;

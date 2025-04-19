@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const z = require('zod')
 const newFavoriteModel = require('../models/favoriteModel')
 const newUserModel = require('../models/userModel')
 
 router.post('/editFavorite', async (req, res) => {
-    // store new user information
+    // store new favorite information
     const {favoriteId, ownerId, route, station} = req.body
 
     // check if owner exists
@@ -14,19 +13,18 @@ router.post('/editFavorite', async (req, res) => {
 
     // Validation for the route and station will need to be added later.
 
-    // find and update user using stored information
-    newFavoriteModel.findByIdAndUpdate(favoriteId, {
-        ownerId: ownerId,
-        route: route,
-        station: station
-    }, function (err, favorite) {
-        if (err) {
-            console.log(err);
-        } else {
-            return res.json(favorite);
-        }
-    });
-
+    // find and update favorite using stored information
+    try {
+        const favorite = await newFavoriteModel.findByIdAndUpdate(favoriteId, {
+            ownerId: ownerId,
+            route: route,
+            station: station
+        });
+        return res.json(favorite);
+    } catch (err) {
+        console.log(err);
+        res.status(400).send(err);
+    }
 })
 
 module.exports = router;

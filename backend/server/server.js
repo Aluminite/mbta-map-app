@@ -45,6 +45,6 @@ app.use('/api', tripShapesApi)
 app.use('/api', stopsApi)
 app.use('/api', predictionsApi)
 
-app.listen(SERVER_PORT, (req, res) => {
+app.listen(SERVER_PORT, () => {
     console.log(`The backend service is running on port ${SERVER_PORT} and waiting for requests.`);
 })

@@ -26,9 +26,20 @@ POST http://localhost:8081/user/editUser
 Content-Type: application/json 
 
 {
-    "userId" : "67d4634b26893332736331b6",
+    "userId" : "68030c576a4188329e725b89",
     "username" : "Tochi Edit",
     "password" : "dwwrwr"
+}
+
+###
+POST http://localhost:8081/user/editUser
+Content-Type: application/json
+
+{
+  "userId" : "68030c576a4188329e725b89",
+  "username" : "Tochi Edit",
+  "email" : "invalid@example.com",
+  "password" : "testtest"
 }
 
 ###
@@ -36,7 +47,7 @@ GET  http://localhost:8081/user/getUserById
 Content-Type: application/json 
 
 {
-    "userId" : "635ab8dfc407faf9f73deaf1"
+    "userId" : "68030c576a4188329e725b89"
 }
 
 ###
@@ -52,13 +63,13 @@ POST  http://localhost:8081/favorite/newFavorite
 Content-Type: application/json
 
 {
-    "ownerId" : "67d4634b26893332736331b6",
+    "ownerId" : "68030c576a4188329e725b89",
     "route" : "CR-Newburyport",
     "station" : "place-ER-0168"
 }
 
 ###
-GET  http://localhost:8081/favorite/getFavoriteById/67d4638626893332736331bd
+GET  http://localhost:8081/favorite/getFavoriteById/68030d4740574c59bcb36208
 Content-Type: application/json
 
 ###
@@ -66,8 +77,8 @@ POST http://localhost:8081/favorite/editFavorite
 Content-Type: application/json
 
 {
-    "favoriteId" : "67d4638626893332736331bd",
-    "ownerId" : "67d4634b26893332736331b6",
+    "favoriteId" : "68030d4740574c59bcb36208",
+    "ownerId" : "68030c576a4188329e725b89",
     "route" : "Red",
     "station" : "place-sstat"
 }
@@ -85,25 +96,21 @@ GET http://localhost:8081/api/vehicles/1
 Content-Type: application/json
 
 ### Get trips for a route
-GET http://localhost:8081/api/trips/Red
+GET http://localhost:8081/api/trips/67959825
 Content-Type: application/json
 
 ### Get shape info by route ID
-GET http://localhost:8081/api/shapes/Red
+GET http://localhost:8081/api/shapes/933_0020
 Content-Type: application/json
 
 ### Get all mbta routes
-GET http://localhost:8081/api/routes
+GET http://localhost:8081/api/routes/
 Content-Type: application/json
 
 ### Get subway routes
-GET http://localhost:8081/api/routes?type=1
-Content-Type: application/json
-
-### Get stops by route ID
-GET http://localhost:8081/api/stops?routeId=Orange
+GET http://localhost:8081/api/routes/1
 Content-Type: application/json
 
 ### Get stops by route and date
-GET http://localhost:8081/api/stops?routeId=Red&date=2025-04-17
+GET http://localhost:8081/api/stops/2025-04-18/Orange
 Content-Type: application/json

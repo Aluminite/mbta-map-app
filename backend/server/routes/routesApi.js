@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 
-router.get('/routes/:type?', async (req, res) => {
+router.get('/routes/{:type}', async (req, res) => {
   const { type } = req.params
 
   try {
