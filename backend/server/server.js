@@ -1,4 +1,5 @@
-const express = require("express");
+const compression = require("compression")
+const express = require("express")
 const app = express();
 const cors = require('cors')
 const loginRoute = require('./routes/userLogin')
@@ -19,7 +20,9 @@ const tripShapesApi = require('./routes/tripShapeApi')
 const stopsApi = require('./routes/stopsApi')
 const predictionsApi = require('./routes/predictionsApi')
 
-require('dotenv').config();
+app.use(compression())
+
+require('dotenv').config()
 const SERVER_PORT = 8081
 
 dbConnection()
