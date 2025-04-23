@@ -306,7 +306,6 @@ const MbtaMap = () => {
                             ext="png"
                             minZoom={8}
                         />
-                        <LocationMarker/>
                         <Polyline pathOptions={currentColor} positions={currentPolyline} interactive={false}/>
                         {routeStops.map(stop => {
                             let direction0Prediction = null;
@@ -362,6 +361,7 @@ const MbtaMap = () => {
                                 </Marker>
                             );
                         })}
+                        <LocationMarker/>
                     </MapContainer>
                 </div>
             </div>
