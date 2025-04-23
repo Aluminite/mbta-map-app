@@ -4,8 +4,8 @@ import leaflet from 'leaflet';
 import {renderToStaticMarkup} from "react-dom/server";
 
 
-function generateVehicleIcon(type, color) {
-    const style = {stroke: "#202020", strokeWidth: 15, fill: color}
+function generateVehicleIcon(type, color, dark) {
+    const style = {stroke: (dark ? "#282828" : "#ededed"), strokeWidth: 15, fill: color}
     let icon;
     switch (type) {
         case 0:
@@ -32,9 +32,9 @@ function generateVehicleIcon(type, color) {
     return leaflet.divIcon({className: "transparent-bg", iconAnchor: [12, 12], html: renderToStaticMarkup(icon)});
 }
 
-function generateHeadingIcon(heading, color) {
+function generateHeadingIcon(heading, color, dark) {
     const transform = "rotate(" + heading + ",24,24)";
-    const style = {stroke: "#202020", strokeWidth: 0.7, fill: color};
+    const style = {stroke: (dark ? "#282828" : "#ededed"), strokeWidth: 0.7, fill: color};
     const icon = <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48"><polygon points="24,0 28,10 20,10" style={style} transform={transform} /></svg>;
     
     return leaflet.divIcon({className: "transparent-bg", iconAnchor: [24, 24], html: renderToStaticMarkup(icon)});

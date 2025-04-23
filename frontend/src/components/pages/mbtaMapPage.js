@@ -4,6 +4,7 @@ import {MapContainer, TileLayer, Polyline, Marker, Circle, Popup, useMap as useL
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
+import {ToggleButton} from "react-bootstrap";
 import {decode} from "@googlemaps/polyline-codec";
 import {generateVehicleIcon, generateHeadingIcon} from '../../utilities/icons';
 import leaflet from 'leaflet';
@@ -21,6 +22,7 @@ const MbtaMap = () => {
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
     const locationAdded = useRef(false);
+    const [darkTheme, setDarkTheme] = useState(false);
 
     useEffect(() => {
         getRoutes("");
@@ -59,7 +61,7 @@ const MbtaMap = () => {
         if (selectedRoute.current != null) {
             setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
             setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
-                "#" + selectedRoute.current.attributes["color"]));
+                "#" + selectedRoute.current.attributes["color"], darkTheme));
         }
     }
 
@@ -244,17 +246,24 @@ const MbtaMap = () => {
         return null;
     }
 
+    function handleThemeChange({currentTarget: button}) {
+        setDarkTheme(button.checked);
+        setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
+            "#" + selectedRoute.current.attributes["color"], button.checked));
+
+    }
+
     return (
-        <div className="map-page-container">
+        <div className="map-page-container" data-bs-theme={darkTheme ? "dark" : "light"}>
             <div className="dropdown-container">
-                <Form.Select className="dropdown" onChange={handleTypeChange}>
+                <Form.Select className="no-round-corner" onChange={handleTypeChange}>
                     <option value="">All Route Types</option>
                     <option value="0,1">Subway</option>
                     <option value="2">Commuter Rail</option>
                     <option value="3">Bus</option>
                     <option value="4">Ferry</option>
                 </Form.Select>
-                <Form.Select className="dropdown" onChange={handleRouteChange}>
+                <Form.Select className="no-round-corner" onChange={handleRouteChange}>
                     <option value="">Choose Route</option>
                     {transitRoutes.map(route => {
                         let name = "";
@@ -282,13 +291,18 @@ const MbtaMap = () => {
                     })
                     }
                 </Form.Select>
+                <ToggleButton className="no-round-corner" id="dark-theme" value="1" type="checkbox"
+                              variant={darkTheme ? "light" : "dark"} checked={darkTheme} onChange={handleThemeChange}>
+                    {(darkTheme ? "Light" : "Dark")}
+                </ToggleButton>
             </div>
             <div className="map-container">
                 <div className="map">
                     <MapContainer center={[42.359149, -71.0581643]} zoom={10} scrollWheelZoom={true}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}"
+                            url={"https://tiles.stadiamaps.com/tiles/alidade_smooth" +
+                                (darkTheme ? "_dark" : "") + "/{z}/{x}/{y}{r}.{ext}"}
                             ext="png"
                             minZoom={8}
                         />
@@ -304,11 +318,12 @@ const MbtaMap = () => {
                             return (
                                 <Circle key={stop.id}
                                         center={[stop.attributes.latitude, stop.attributes.longitude]}
-                                        pathOptions={{color: "#CCCCCC"}} radius={10} eventHandlers={{
-                                    click: () => {
-                                        getStopPredictions(stop, selectedRoute.current);
-                                    },
-                                }}>
+                                        pathOptions={{color: (darkTheme ? "#CCCCCC" : "#666666")}} radius={10}
+                                        eventHandlers={{
+                                            click: () => {
+                                                getStopPredictions(stop, selectedRoute.current);
+                                            },
+                                        }}>
                                     <Popup>
                                         {stop.attributes.name}<br/>
                                         {direction0Prediction}{direction1Prediction !== null ? <br/> : null}
@@ -338,7 +353,7 @@ const MbtaMap = () => {
                                     {vehicle.attributes.bearing != null ?
                                         <Marker // The API returns null for the bearing sometimes, so we need to check
                                             position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                            icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color)}
+                                            icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color, darkTheme)}
                                             interactive={false}/> : null}
                                     <Popup>
                                         Vehicle {vehicle.attributes.label}<br/>
