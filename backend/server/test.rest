@@ -114,3 +114,7 @@ Content-Type: application/json
 ### Get stops by route and date
 GET http://localhost:8081/api/stops/2025-04-18/Orange
 Content-Type: application/json
+
+### Get all alerts
+GET http://localhost:8081/api/alerts
+Content-Type: application/json
