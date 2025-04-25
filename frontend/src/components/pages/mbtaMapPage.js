@@ -248,9 +248,10 @@ const MbtaMap = () => {
 
     function handleThemeChange({currentTarget: button}) {
         setDarkTheme(button.checked);
-        setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
-            "#" + selectedRoute.current.attributes["color"], button.checked));
-
+        if (selectedRoute.current != null) {
+            setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
+                "#" + selectedRoute.current.attributes["color"], button.checked));
+        }
     }
 
     return (
