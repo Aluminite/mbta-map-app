@@ -1,46 +1,63 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const newUserModel = require('../models/userModel')
-const {newUserValidation} = require('../models/userValidator');
+const userModel = require('../models/userModel');
+const {userValidation} = require('../models/userValidator');
 const {generateAccessToken} = require('../utilities/generateToken');
+const {authenticateToken} = require("../utilities/authenticateToken");
 
+// POST /user/editUser
+// Body (in JSON format):
+// accessToken: current user JWT
+// username: new username
+// email: new email
+// password: new password
 router.post('/editUser', async (req, res) => {
+    // authenticate the user
+    let decodedToken = null;
+    try {
+        decodedToken = authenticateToken(req);
+    } catch (error) {
+        // The authenticate function will always throw an error if authentication doesn't succeed
+        return res.status(403).send("Authentication failed: " + error);
+    }
+
     // validate new user information
-    const {error} = newUserValidation(req.body);
+    const {error} = userValidation(req.body);
     if (error) return res.status(400).send({message: error.errors[0].message});
 
     // store new user information
-    const {userId, username, email, password} = req.body
+    const userId = decodedToken.id;
+    const {username, email, password} = req.body;
 
     // check if username is available
-    let user = await newUserModel.findOne({username: username})
+    let user = await userModel.findOne({username: username});
     if (user) {
-        let userIdReg = JSON.stringify(user._id).replace(/"+/g, '')
-        if (userIdReg !== userId) return res.status(409).send({message: "Username is taken, pick another"})
+        let userIdReg = JSON.stringify(user._id).replace(/"+/g, '');
+        if (userIdReg !== userId) return res.status(409).send("Username is taken, pick another");
     }
 
     // generates the hash
-    const generateHash = await bcrypt.genSalt(Number(10))
+    const generateHash = await bcrypt.genSalt(Number(10));
 
     // parse the generated hash into the password
-    const hashPassword = await bcrypt.hash(password, generateHash)
+    const hashPassword = await bcrypt.hash(password, generateHash);
 
     // find and update user using stored information
     try {
-        user = await newUserModel.findByIdAndUpdate(userId, {
+        user = await userModel.findByIdAndUpdate(userId, {
             username: username,
             email: email,
             password: hashPassword
         });
 
         // create and send new access token to local storage
-        const accessToken = generateAccessToken(user._id, email, username, hashPassword)
-        res.header('Authorization', accessToken).send({accessToken: accessToken})
+        const accessToken = generateAccessToken(user._id, email, username, hashPassword);
+        res.header('Authorization', accessToken).send({accessToken: accessToken});
     } catch (err) {
         console.log(err);
         res.status(400).send(err);
     }
-})
+});
 
 module.exports = router;

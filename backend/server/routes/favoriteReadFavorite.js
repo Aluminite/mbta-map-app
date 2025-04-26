@@ -1,15 +1,17 @@
 const express = require("express");
 const router = express.Router();
+const favoriteModel = require("../models/favoriteModel");
 
-const newFavoriteModel = require("../models/favoriteModel");
-
-router.get("/getFavoriteById/:favoriteId", async (req, res) => {
+// GET /favorites/:favoriteID
+// Body (in JSON format):
+// accessToken: current user JWT
+router.get("/:favoriteId", async (req, res) => {
     let {favoriteId} = req.params;
 
     try {
-        const favorite = await newFavoriteModel.findById(favoriteId)
+        const favorite = await favoriteModel.findById(favoriteId);
         if (favorite == null) {
-            res.status(404).send("favoriteId does not exist.");
+            res.status(404).send({message: "favoriteId does not exist."});
         } else {
             return res.json(favorite);
         }

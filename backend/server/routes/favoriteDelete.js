@@ -1,15 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const favoriteModel = require('../models/favoriteModel');
-const userModel = require('../models/userModel');
 const {authenticateToken} = require("../utilities/authenticateToken");
+const userModel = require("../models/userModel");
 
-// POST /favorites/new
+// DELETE /favorites/:favoriteID
 // Body (in JSON format):
 // accessToken: current user JWT
-// route: favorite route
-// station: favorite station
-router.post('/new', async (req, res) => {
+router.delete('/:favoriteId', async (req, res) => {
     // authenticate the user
     let decodedToken = null;
     try {
@@ -19,31 +17,22 @@ router.post('/new', async (req, res) => {
         return res.status(403).send({message: "Authentication failed"});
     }
     const ownerId = decodedToken.id;
+    const {favoriteId} = req.params;
 
     const user = await userModel.findById(ownerId);
     if (!user) {
         return res.status(400).send({message: "User not found"});
     }
 
-    const {route, station} = req.body;
-
-    // creates a new favorite
-    const createFavorite = new favoriteModel({
-        ownerId: ownerId,
-        route: route,
-        station: station,
-    });
-
     try {
-        const saveNewFavorite = await createFavorite.save();
-        user.favorites.push(saveNewFavorite);
+        const favorite = await favoriteModel.findOneAndDelete({ownerId: ownerId, _id: favoriteId});
+        user.favorites = user.favorites.filter(e => !e.equals(favorite._id));
         user.markModified('favorites');
         await user.save();
-        res.json(saveNewFavorite);
+        return res.json(favorite);
     } catch (error) {
-        res.status(400).send({message: "Error trying to create new favorite"});
+        res.status(400).send({message: "Error trying to delete favorite"});
     }
-
 });
 
 module.exports = router;

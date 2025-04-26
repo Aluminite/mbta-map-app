@@ -1,20 +1,19 @@
 POST http://localhost:8081/user/signup
-Content-Type: application/json 
+Content-Type: application/json
 
 {
-    "username" : "tochiamanze",
-    "email" : "cdon@gmail.com",
-    "password" : "tochi12345"
+  "username": "PeterGriffin",
+  "email": "petergriffin@gmail.com",
+  "password": "hehehehe"
 }
 
 ###
-
 POST http://localhost:8081/user/login
-Content-Type: application/json 
+Content-Type: application/json
 
 {
-    "username" : "tochiamanze",
-    "password" : "tochi12345"
+  "username": "PeterGriffin",
+  "password": "hehehehe"
 }
 
 ###
@@ -23,12 +22,13 @@ Content-Type: application/json
 
 ###
 POST http://localhost:8081/user/editUser
-Content-Type: application/json 
+Content-Type: application/json
 
 {
-    "userId" : "68030c576a4188329e725b89",
-    "username" : "Tochi Edit",
-    "password" : "dwwrwr"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoicGV0ZXJncmlmZmluQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiUGV0ZXJHcmlmZmluIiwiaWF0IjoxNzQ1NjQxNzA3LCJleHAiOjE3NDgyMzM3MDd9.Mj9sINjvXKuiDjihFGXiEl6QbV5E58euvd0DJsBhmwE",
+  "username": "Short",
+  "email": "notanemail",
+  "password": "tooshort"
 }
 
 ###
@@ -36,60 +36,41 @@ POST http://localhost:8081/user/editUser
 Content-Type: application/json
 
 {
-  "userId" : "68030c576a4188329e725b89",
-  "username" : "Tochi Edit",
-  "email" : "invalid@example.com",
-  "password" : "testtest"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoicGV0ZXJncmlmZmluQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiUGV0ZXJHcmlmZmluIiwiaWF0IjoxNzQ1NjQxNzA3LCJleHAiOjE3NDgyMzM3MDd9.Mj9sINjvXKuiDjihFGXiEl6QbV5E58euvd0DJsBhmwE",
+  "username": "LoisGriffin",
+  "email": "loisgriffin@gmail.com",
+  "password": "peeeetah"
 }
 
 ###
-GET  http://localhost:8081/user/getUserById
-Content-Type: application/json 
-
-{
-    "userId" : "68030c576a4188329e725b89"
-}
-
-###
-GET  http://localhost:8081/user/getUserById
-Content-Type: application/json 
-
-{
-    "userId" : "67d4634b26893332736331b6"
-}
-
-###
-POST  http://localhost:8081/favorite/newFavorite
+GET  http://localhost:8081/user/userInfo
 Content-Type: application/json
 
 {
-    "ownerId" : "68030c576a4188329e725b89",
-    "route" : "CR-Newburyport",
-    "station" : "place-ER-0168"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI"
 }
 
 ###
-GET  http://localhost:8081/favorite/getFavoriteById/68030d4740574c59bcb36208
-Content-Type: application/json
-
-###
-POST http://localhost:8081/favorite/editFavorite
+POST http://localhost:8081/favorites/new
 Content-Type: application/json
 
 {
-    "favoriteId" : "68030d4740574c59bcb36208",
-    "ownerId" : "68030c576a4188329e725b89",
-    "route" : "Red",
-    "station" : "place-sstat"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI",
+  "route": "CR-Newburyport",
+  "station": "place-ER-0168"
 }
 
 ###
-POST  http://localhost:8081/user/deleteAll
+GET  http://localhost:8081/favorites/680c621237f9cb990800aa27
 Content-Type: application/json
 
 ###
-POST  http://localhost:8081/favorite/deleteAllFavorite
+DELETE http://localhost:8081/favorites/680c621237f9cb990800aa27
 Content-Type: application/json
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI"
+}
 
 ### Get vehicles for a route
 GET http://localhost:8081/api/vehicles/1

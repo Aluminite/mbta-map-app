@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const newUserModel = require('../models/userModel')
+const userModel = require('../models/userModel');
+
+// Will probably remove later?
 
 router.get('/getAll', async (req, res) => {
-    const user = await newUserModel.find();
-    return res.json(user)
-})
+    const user = await userModel.find();
+    return res.json(user);
+});
 
 module.exports = router;
