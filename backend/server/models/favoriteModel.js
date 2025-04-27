@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const favoriteSchema = new mongoose.Schema(
     {
         ownerId: {
-            type: String,
+            type: mongoose.Types.ObjectId,
             required: true,
             label: "ownerId",
         },

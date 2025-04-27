@@ -13,7 +13,7 @@ router.post('/signup', async (req, res) => {
 
     //check if email already exists
     const user = await userModel.findOne({username: username});
-    if (user)
+    if (user !== null)
         return res.status(409).send({message: "Username is taken, pick another"});
 
     //generates the hash
@@ -32,9 +32,9 @@ router.post('/signup', async (req, res) => {
 
     try {
         const saveNewUser = await createUser.save();
-        res.send(saveNewUser);
+        return res.send(saveNewUser);
     } catch (error) {
-        res.status(400).send({message: "Error trying to create new user"});
+        return res.status(400).send({message: "Error trying to create new user"});
     }
 
 });

@@ -25,7 +25,6 @@ POST http://localhost:8081/user/editUser
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoicGV0ZXJncmlmZmluQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiUGV0ZXJHcmlmZmluIiwiaWF0IjoxNzQ1NjQxNzA3LCJleHAiOjE3NDgyMzM3MDd9.Mj9sINjvXKuiDjihFGXiEl6QbV5E58euvd0DJsBhmwE",
   "username": "Short",
   "email": "notanemail",
   "password": "tooshort"
@@ -36,7 +35,6 @@ POST http://localhost:8081/user/editUser
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoicGV0ZXJncmlmZmluQGdtYWlsLmNvbSIsInVzZXJuYW1lIjoiUGV0ZXJHcmlmZmluIiwiaWF0IjoxNzQ1NjQxNzA3LCJleHAiOjE3NDgyMzM3MDd9.Mj9sINjvXKuiDjihFGXiEl6QbV5E58euvd0DJsBhmwE",
   "username": "LoisGriffin",
   "email": "loisgriffin@gmail.com",
   "password": "peeeetah"
@@ -46,8 +44,12 @@ Content-Type: application/json
 GET  http://localhost:8081/user/userInfo
 Content-Type: application/json
 
+###
+POST http://localhost:8081/user/darkTheme
+Content-Type: application/json
+
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI"
+  "darkTheme": true
 }
 
 ###
@@ -55,22 +57,17 @@ POST http://localhost:8081/favorites/new
 Content-Type: application/json
 
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI",
   "route": "CR-Newburyport",
   "station": "place-ER-0168"
 }
 
 ###
-GET  http://localhost:8081/favorites/680c621237f9cb990800aa27
+GET  http://localhost:8081/favorites/680db66def89911f2821c0c3
 Content-Type: application/json
 
 ###
-DELETE http://localhost:8081/favorites/680c621237f9cb990800aa27
+DELETE http://localhost:8081/favorites/680db66def89911f2821c0c3
 Content-Type: application/json
-
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGM2MGUzMzdmOWNiOTkwODAwYWEyMCIsImVtYWlsIjoibG9pc2dyaWZmaW5AZ21haWwuY29tIiwidXNlcm5hbWUiOiJMb2lzR3JpZmZpbiIsImlhdCI6MTc0NTY0MTkxMywiZXhwIjoxNzQ4MjMzOTEzfQ.F_eRz4sSZQNiy8_GwzXqpL6GNFd3vinggQKoi8tpfHI"
-}
 
 ### Get vehicles for a route
 GET http://localhost:8081/api/vehicles/1

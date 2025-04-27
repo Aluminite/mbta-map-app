@@ -5,8 +5,8 @@ const userModel = require('../models/userModel');
 const {authenticateToken} = require("../utilities/authenticateToken");
 
 // POST /favorites/new
+// JWT must be in the cookie "jwt".
 // Body (in JSON format):
-// accessToken: current user JWT
 // route: favorite route
 // station: favorite station
 router.post('/new', async (req, res) => {
@@ -16,12 +16,12 @@ router.post('/new', async (req, res) => {
         decodedToken = authenticateToken(req);
     } catch (error) {
         // The authenticate function will always throw an error if authentication doesn't succeed
-        return res.status(403).send({message: "Authentication failed"});
+        return res.status(401).send({message: "Authentication failed"});
     }
     const ownerId = decodedToken.id;
 
     const user = await userModel.findById(ownerId);
-    if (!user) {
+    if (user === null) {
         return res.status(400).send({message: "User not found"});
     }
 
@@ -39,9 +39,9 @@ router.post('/new', async (req, res) => {
         user.favorites.push(saveNewFavorite);
         user.markModified('favorites');
         await user.save();
-        res.json(saveNewFavorite);
+        return res.json(saveNewFavorite);
     } catch (error) {
-        res.status(400).send({message: "Error trying to create new favorite"});
+        return res.status(400).send({message: "Error trying to create new favorite"});
     }
 
 });

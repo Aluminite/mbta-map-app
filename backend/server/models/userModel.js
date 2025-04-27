@@ -31,7 +31,14 @@ const userSchema = new mongoose.Schema(
             default: [],
         }
     },
-    {collection: "users"}
+    {
+        collection: "users",
+        toJSON: {
+            transform: (doc, ret) => {
+                delete ret.password;
+            }
+        }
+    }
 );
 
 module.exports = mongoose.model('users', userSchema);

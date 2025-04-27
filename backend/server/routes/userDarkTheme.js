@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const userModel = require("../models/userModel");
+const userModel = require('../models/userModel');
 const {authenticateToken} = require("../utilities/authenticateToken");
 
-// GET /user/userInfo
+// POST /user/darkTheme
 // JWT must be in the cookie "jwt".
-router.get("/userInfo", async (req, res) => {
+// Body (in JSON format):
+// darkTheme: true or false
+router.post('/darkTheme', async (req, res) => {
     // authenticate the user
     let decodedToken = null;
     try {
@@ -15,15 +17,23 @@ router.get("/userInfo", async (req, res) => {
         return res.status(401).send({message: "Authentication failed"});
     }
     const userId = decodedToken.id;
+    const {darkTheme} = req.body;
+    if (darkTheme === undefined) {
+        return res.status(400).send({message: "darkTheme must be specified"});
+    }
 
+    // find and update user
     try {
-        const user = await userModel.findById(userId);
+        const user = await userModel.findByIdAndUpdate(userId, {
+            darkTheme: darkTheme
+        });
         if (user === null) {
             return res.status(400).send({message: "User not found"});
         }
-        return res.json(user);
+
+        return res.send({darkTheme: darkTheme});
     } catch (err) {
-        return res.status(400).send({message: "Error trying to get user info"});
+        return res.status(400).send({message: "Failed to set theme preference"});
     }
 });
 

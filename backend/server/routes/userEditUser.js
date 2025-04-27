@@ -7,8 +7,8 @@ const {generateAccessToken} = require('../utilities/generateToken');
 const {authenticateToken} = require("../utilities/authenticateToken");
 
 // POST /user/editUser
+// JWT must be in the cookie "jwt".
 // Body (in JSON format):
-// accessToken: current user JWT
 // username: new username
 // email: new email
 // password: new password
@@ -19,7 +19,7 @@ router.post('/editUser', async (req, res) => {
         decodedToken = authenticateToken(req);
     } catch (error) {
         // The authenticate function will always throw an error if authentication doesn't succeed
-        return res.status(403).send("Authentication failed: " + error);
+        return res.status(401).send({message: "Authentication failed"});
     }
 
     // validate new user information
@@ -32,7 +32,7 @@ router.post('/editUser', async (req, res) => {
 
     // check if username is available
     let user = await userModel.findOne({username: username});
-    if (user) {
+    if (user !== null) {
         let userIdReg = JSON.stringify(user._id).replace(/"+/g, '');
         if (userIdReg !== userId) return res.status(409).send("Username is taken, pick another");
     }
@@ -50,13 +50,16 @@ router.post('/editUser', async (req, res) => {
             email: email,
             password: hashPassword
         });
+        if (user === null) {
+            return res.status(400).send({message: "User not found"});
+        }
 
-        // create and send new access token to local storage
-        const accessToken = generateAccessToken(user._id, email, username, hashPassword);
-        res.header('Authorization', accessToken).send({accessToken: accessToken});
+        // create and send new access token
+        const accessToken = generateAccessToken(user._id, email, username);
+        return res.cookie('jwt', accessToken, {httpOnly: true, secure: true, maxAge: 2592000000})
+            .send({message: "User edited successfully"});
     } catch (err) {
-        console.log(err);
-        res.status(400).send(err);
+        return res.status(400).send({message: "Error trying to update user"});
     }
 });
 
