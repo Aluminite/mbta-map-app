@@ -3,19 +3,19 @@ import {useNavigate, Link} from "react-router-dom";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import getUserInfo from "../../utilities/decodeJwt";
+import getUserData from "../../utilities/getUserData";
 
 const PRIMARY_COLOR = "#cc5c99";
-const SECONDARY_COLOR = '#0c0c1f'
+const SECONDARY_COLOR = '#0c0c1f';
 const url = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/login`;
 
 const Login = () => {
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState(null);
     const [data, setData] = useState({username: "", password: ""});
     const [error, setError] = useState("");
     const [light, setLight] = useState(false);
     const [bgColor, setBgColor] = useState(SECONDARY_COLOR);
-    const [bgText, setBgText] = useState('Light Mode')
+    const [bgText, setBgText] = useState('Light Mode');
     const navigate = useNavigate();
 
     let labelStyling = {
@@ -35,25 +35,24 @@ const Login = () => {
     };
 
     useEffect(() => {
-        const obj = getUserInfo()
-        setUser(obj)
+        (async () => {
+            const userData = await getUserData();
+            setUser(userData);
+        })();
 
         if (light) {
             setBgColor("white");
-            setBgText('Dark mode')
+            setBgText('Dark mode');
         } else {
             setBgColor(SECONDARY_COLOR);
-            setBgText('Light mode')
+            setBgText('Light mode');
         }
     }, [light]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const {data: res} = await axios.post(url, data);
-            const {accessToken} = res;
-            //store token in localStorage
-            localStorage.setItem("accessToken", accessToken);
+            await axios.post(url, data, {withCredentials: true});
             navigate("/home");
         } catch (error) {
             if (
@@ -67,8 +66,8 @@ const Login = () => {
     };
 
     if (user) {
-        navigate('/home')
-        return
+        navigate('/home');
+        return;
     }
 
     return (
@@ -116,20 +115,20 @@ const Login = () => {
                                         type="checkbox"
                                         id="flexSwitchCheckDefault"
                                         onChange={() => {
-                                            setLight(!light)
+                                            setLight(!light);
                                         }}
                                     />
                                     <label className="form-check-label text-muted" htmlFor="flexSwitchCheckDefault">
                                         {bgText}
                                     </label>
                                 </div>
-                                {error && <div style={labelStyling} className='pt-3'>{error}</div>}
+                                {error && <div style={labelStyling} className="pt-3">{error}</div>}
                                 <Button
                                     variant="primary"
                                     type="submit"
                                     onClick={handleSubmit}
                                     style={buttonStyling}
-                                    className='mt-2'
+                                    className="mt-2"
                                 >
                                     Log In
                                 </Button>

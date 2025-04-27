@@ -11,38 +11,25 @@ import HomePage from "./components/pages/homePage";
 import Login from "./components/pages/loginPage";
 import Signup from "./components/pages/registerPage";
 import PrivateUserProfile from "./components/pages/privateUserProfilePage";
-import {createContext, useState, useEffect} from "react";
-import getUserInfo from "./utilities/decodeJwt";
 import MbtaMap from "./components/pages/mbtaMapPage";
-import AlertsPage from "./components/pages/alertsPage.js"
+import AlertsPage from "./components/pages/alertsPage.js";
 
-export const UserContext = createContext();
-//test change
-//test again
 const App = () => {
-    const [user, setUser] = useState();
-
-    useEffect(() => {
-        setUser(getUserInfo());
-    }, []);
-
     return (
         <>
             <Navbar/>
-            <UserContext.Provider value={user}>
-                <Routes>
-                    <Route exact path="/" element={<LandingPage/>}/>
-                    <Route exact path="/home" element={<HomePage/>}/>
-                    <Route exact path="/alerts" element={<AlertsPage/>}/>
-                    <Route exact path="/map" element={<MbtaMap/>}/>
-                    <Route exact path="/login" element={<Login/>}/>
-                    <Route exact path="/signup" element={<Signup/>}/>
-                    <Route path="/privateUserProfile" element={<PrivateUserProfile/>}/>
-                </Routes>
-            </UserContext.Provider>
+            <Routes>
+                <Route exact path="/" element={<LandingPage/>}/>
+                <Route exact path="/home" element={<HomePage/>}/>
+                <Route exact path="/alerts" element={<AlertsPage/>}/>
+                <Route exact path="/map" element={<MbtaMap/>}/>
+                <Route exact path="/login" element={<Login/>}/>
+                <Route exact path="/signup" element={<Signup/>}/>
+                <Route path="/privateUserProfile" element={<PrivateUserProfile/>}/>
+            </Routes>
         </>
     );
 };
 
 
-export default App
+export default App;

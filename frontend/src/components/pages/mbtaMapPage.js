@@ -1,12 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useMap} from "@uidotdev/usehooks";
-import {MapContainer, TileLayer, Polyline, Marker, Circle, Popup, useMap as useLeafletMap} from 'react-leaflet';
+import {Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap as useLeafletMap} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from "axios";
 import Form from 'react-bootstrap/Form';
 import {ToggleButton} from "react-bootstrap";
 import {decode} from "@googlemaps/polyline-codec";
-import {generateVehicleIcon, generateHeadingIcon} from '../../utilities/icons';
+import {generateHeadingIcon, generateVehicleIcon} from '../../utilities/icons';
+import getUserData from "../../utilities/getUserData";
 import leaflet from 'leaflet';
 import {LocateControl} from "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
@@ -25,6 +26,13 @@ const MbtaMap = () => {
     const [darkTheme, setDarkTheme] = useState(false);
 
     useEffect(() => {
+        (async () => {
+            const userData = await getUserData();
+            if (userData !== null) {
+                setDarkTheme(userData.darkTheme);
+            }
+        })();
+
         getRoutes("");
 
         const interval = setInterval(() => {
@@ -33,7 +41,7 @@ const MbtaMap = () => {
 
         return () => {
             clearInterval(interval);
-        }
+        };
     }, []);
 
     function handleTypeChange({currentTarget: dropdown}) {
@@ -41,16 +49,12 @@ const MbtaMap = () => {
     }
 
     function getRoutes(filter) {
-        async function fetchData() {
-            const result = await axios(
+        (async () => {
+            const routes = await axios.get(
                 `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes/` + filter
             );
-            return result.data;
-        }
-
-        fetchData().then((routes) => {
-            setTransitRoutes(routes.data);
-        });
+            setTransitRoutes(routes.data.data);
+        })();
     }
 
     function handleRouteChange({currentTarget: dropdown}) {
@@ -67,42 +71,28 @@ const MbtaMap = () => {
 
     function updateRouteVehicles(route) {
         if (route != null) {
-            async function fetchData() {
-                const result = await axios(
-                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/vehicles/` + route.id
+            (async () => {
+                const vehicles = await axios.get(
+                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/vehicles/${route.id}`
                 );
-                return result.data;
-            }
-
-            fetchData().then((vehicles) => {
-                setRouteVehicles(vehicles.data);
-            });
+                setRouteVehicles(vehicles.data.data);
+            })();
         } else {
             setRouteVehicles([]);
         }
     }
 
     function findPolyline(tripID) {
-        async function fetchData() {
-            const result = await axios(
-                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/trips/` + tripID
+        (async () => {
+            const trip = await axios.get(
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/trips/${tripID}`
             );
-            return result.data;
-        }
-
-        fetchData().then((trip) => {
-            async function fetchData() {
-                const result = await axios(
-                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/shapes/` + trip.data.relationships.shape.data.id
-                );
-                return result.data;
-            }
-
-            fetchData().then((shape) => {
-                const decoded = decode(shape.data.attributes.polyline)
-                setCurrentPolyline(decoded);
-            })
-        });
+            const shape = await axios.get(
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/shapes/${trip.data.data.relationships.shape.data.id}`
+            );
+            const decoded = decode(shape.data.data.attributes.polyline);
+            setCurrentPolyline(decoded);
+        })();
     }
 
     function currentServiceDate() {
@@ -123,17 +113,13 @@ const MbtaMap = () => {
 
     function getStops(route) {
         if (route != null) {
-            async function fetchData() {
-                const result = await axios(
+            (async () => {
+                const stops = await axios.get(
                     `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/stops/${currentServiceDate()}/${route.id}`
                 );
-                return result.data;
-            }
-
-            fetchData().then((stops) => {
-                setRouteStops(stops.data);
-                setRouteStopChildren(stops.included);
-            });
+                setRouteStops(stops.data.data);
+                setRouteStopChildren(stops.data.included);
+            })();
         } else {
             setRouteStops([]);
         }
@@ -141,21 +127,17 @@ const MbtaMap = () => {
 
     function getStopPredictions(stop, route) {
         if (stop != null) {
-            async function fetchData() {
-                const result = await axios(
+            (async () => {
+                const predictions = await axios.get(
                     `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/predictions/${stop.id}/${route.id}`
                 );
-                return result.data;
-            }
-
-            fetchData().then((predictions) => {
-                stopPredictions.set(stop.id, predictions.data)
-            });
+                stopPredictions.set(stop.id, predictions.data.data);
+            })();
         }
     }
 
     function dateToUSTime(date) {
-        let hours = (date.getHours() % 12).toString()
+        let hours = (date.getHours() % 12).toString();
         if (hours === "0") hours = "12";
         let minutes = date.getMinutes().toString().padStart(2, '0');
         let ampm = Math.floor(date.getHours() / 12) === 0 ? "AM" : "PM";
@@ -187,7 +169,7 @@ const MbtaMap = () => {
                 }
             }
             return false;
-        })
+        });
 
         if (predictionDate === null) {
             return "No prediction to " + selectedRoute.current.attributes.direction_destinations[direction];
@@ -367,7 +349,7 @@ const MbtaMap = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default MbtaMap
+export default MbtaMap;

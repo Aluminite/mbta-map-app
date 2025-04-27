@@ -1,26 +1,33 @@
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
-import getUserInfo from '../../utilities/decodeJwt';
+import getUserData from "../../utilities/getUserData";
+import axios from "axios";
 
 const HomePage = () => {
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
     const handleClick = (e) => {
         e.preventDefault();
-        localStorage.removeItem('accessToken');
-        return navigate('/');
+        (async () => {
+            await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/user/logout`, null,
+                {withCredentials: true});
+            navigate('/');
+        })();
     };
 
     useEffect(() => {
-        setUser(getUserInfo());
+        (async () => {
+            const userData = await getUserData();
+            setUser(userData);
+        })();
     }, []);
 
-    if (!user) return (
+    if (user === null) return (
         <div><h4>Log in to view this page.</h4></div>
     );
 
-    const {id, email, username} = user;
+    const {_id, email, username} = user;
 
     return (
         <>
@@ -31,7 +38,7 @@ const HomePage = () => {
                 </div>
                 <div className="card">
                     <h3>Your userId in MongoDB is</h3>
-                    <p className="userId">{id}</p>
+                    <p className="userId">{_id}</p>
                 </div>
                 <div className="card">
                     <h3>Your email is</h3>
