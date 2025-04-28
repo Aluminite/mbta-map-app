@@ -19,6 +19,7 @@ const PrivateUserProfile = () => {
     const editUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/editUser`;
     const themeUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/darkTheme`;
     const [form, setFormValues] = useState({username: "", email: "", password: ""});
+    const [darkThemeValue, setDarkThemeValue] = useState(user?.darkTheme ? "true" : "false");
     const [errors, setErrors] = useState({});
 
     // handle logout button
@@ -90,7 +91,7 @@ const PrivateUserProfile = () => {
 
     async function handleThemeSubmit(event) {
         event.preventDefault();
-        const darkTheme = event.currentTarget.form[0].value; // This probably isn't the right way to do it
+        const darkTheme = darkThemeValue === "true";
         try {
             await axios.post(themeUrl, {"darkTheme": darkTheme}, {withCredentials: true});
             window.alert("Default theme updated successfully!");
@@ -178,7 +179,7 @@ const PrivateUserProfile = () => {
                     <Card.Body>
                         <Form>
                             <Form.Group className="mb-3">
-                                <Form.Select id="darkTheme">
+                            <Form.Select id="darkTheme" value={darkThemeValue} onChange={(e) => setDarkThemeValue(e.target.value)}>
                                     <option value="false">Light Theme</option>
                                     <option value="true">Dark Theme</option>
                                 </Form.Select>
