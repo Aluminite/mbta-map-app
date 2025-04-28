@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import {useNavigate, Link} from "react-router-dom";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
@@ -13,6 +13,12 @@ const Login = () => {
     const [data, setData] = useState({username: "", password: ""});
     const [error, setError] = useState("");
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user !== null) {
+            navigate('/home');
+        }
+    }, []);
 
     const handleChange = ({currentTarget: input}) => {
         setData({...data, [input.name]: input.value});
@@ -37,11 +43,6 @@ const Login = () => {
             }
         }
     };
-
-    if (user) {
-        navigate('/home');
-        return;
-    }
 
     return (
         <>
