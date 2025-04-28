@@ -26,6 +26,7 @@ const PrivateUserProfile = () => {
         (async () => {
             await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/user/logout`, null,
                 {withCredentials: true});
+            setUser(null);
             navigate('/');
         })();
     }
