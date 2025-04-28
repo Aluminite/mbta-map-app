@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {useMap} from "@uidotdev/usehooks";
 import {Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap as useLeafletMap} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -7,10 +7,10 @@ import Form from 'react-bootstrap/Form';
 import {ToggleButton} from "react-bootstrap";
 import {decode} from "@googlemaps/polyline-codec";
 import {generateHeadingIcon, generateVehicleIcon} from '../../utilities/icons';
-import getUserData from "../../utilities/getUserData";
 import leaflet from 'leaflet';
 import {LocateControl} from "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+import {ThemeContext, UserContext} from "../../App";
 
 const MbtaMap = () => {
     const [transitRoutes, setTransitRoutes] = useState([]);
@@ -23,16 +23,11 @@ const MbtaMap = () => {
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
     const locationAdded = useRef(false);
-    const [darkTheme, setDarkTheme] = useState(false);
+    const {user, setUser} = useContext(UserContext);
+    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
+
 
     useEffect(() => {
-        (async () => {
-            const userData = await getUserData();
-            if (userData !== null) {
-                setDarkTheme(userData.darkTheme);
-            }
-        })();
-
         getRoutes("");
 
         const interval = setInterval(() => {

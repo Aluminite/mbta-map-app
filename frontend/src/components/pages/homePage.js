@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useContext} from 'react';
 import {useNavigate} from 'react-router-dom';
-import getUserData from "../../utilities/getUserData";
 import axios from "axios";
+import {UserContext} from "../../App";
 
 const HomePage = () => {
-    const [user, setUser] = useState(null);
+    const {user, setUser} = useContext(UserContext);
     const navigate = useNavigate();
 
     const handleClick = (e) => {
@@ -12,16 +12,10 @@ const HomePage = () => {
         (async () => {
             await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/user/logout`, null,
                 {withCredentials: true});
+            setUser(null);
             navigate('/');
         })();
     };
-
-    useEffect(() => {
-        (async () => {
-            const userData = await getUserData();
-            setUser(userData);
-        })();
-    }, []);
 
     if (user === null) return (
         <div><h4>Log in to view this page.</h4></div>

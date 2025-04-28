@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from 'react-bootstrap/Card';
+import {Link} from "react-router-dom";
 
 const Landingpage = () => {
 
@@ -12,8 +13,7 @@ const Landingpage = () => {
                     <Card.Text>
                         If you see this with a blue background and white text, Tailwind is working!
                     </Card.Text>
-                    <Card.Link href="/signup">Sign Up</Card.Link>
-                    <Card.Link href="/login">Login</Card.Link>
+                    <Link to="/signup">Sign Up</Link> or <Link to="/login">Login</Link>
                 </Card.Body>
             </Card>
         </div>

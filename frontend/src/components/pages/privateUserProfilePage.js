@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useContext} from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import {useNavigate} from "react-router-dom";
@@ -8,10 +8,11 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import getUserData from "../../utilities/getUserData";
+import {UserContext} from "../../App";
 
 const PrivateUserProfile = () => {
     const [show, setShow] = useState(false);
-    const [user, setUser] = useState(null);
+    const {user, setUser} = useContext(UserContext);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const navigate = useNavigate();
@@ -19,13 +20,6 @@ const PrivateUserProfile = () => {
     const themeUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/darkTheme`;
     const [form, setFormValues] = useState({username: "", email: "", password: ""});
     const [errors, setErrors] = useState({});
-
-    useEffect(() => {
-        (async () => {
-            const userData = await getUserData();
-            setUser(userData);
-        })();
-    }, []);
 
     // handle logout button
     function handleLogout() {
@@ -71,7 +65,10 @@ const PrivateUserProfile = () => {
             try {
                 await axios.post(editUrl, form, {withCredentials: true});
                 window.alert("Account information updated successfully!");
-                navigate("/privateUserProfile");
+                await (async () => {
+                    const userData = await getUserData();
+                    setUser(userData);
+                })();
             } catch (error) {
                 if (
                     error.response &&
@@ -96,6 +93,10 @@ const PrivateUserProfile = () => {
         try {
             await axios.post(themeUrl, {"darkTheme": darkTheme}, {withCredentials: true});
             window.alert("Default theme updated successfully!");
+            await (async () => {
+                const userData = await getUserData();
+                setUser(userData);
+            })();
         } catch (error) {
             window.alert("Failed to set default theme");
         }
