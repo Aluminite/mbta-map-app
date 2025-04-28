@@ -18,7 +18,7 @@ const Login = () => {
         if (user !== null) {
             navigate('/home');
         }
-    }, []);
+    }, [user, navigate]);
 
     const handleChange = ({currentTarget: input}) => {
         setData({...data, [input.name]: input.value});
@@ -32,7 +32,6 @@ const Login = () => {
                 const userData = await getUserData();
                 setUser(userData);
             })();
-            navigate("/home");
         } catch (error) {
             if (
                 error.response &&
