@@ -4,7 +4,7 @@ const router = express.Router();
 // POST /user/logout
 // Body (in JSON format):
 router.post('/logout', async (req, res) => {
-    return res.cookie('jwt', "", {httpOnly: true, secure: true, expires: new Date(0)})
+    return res.cookie('jwt', "", {httpOnly: true, secure: true, expires: new Date(0), sameSite: "none"})
         .send({message: "Logged out successfully"});
 });
 

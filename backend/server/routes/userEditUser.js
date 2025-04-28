@@ -56,7 +56,7 @@ router.post('/editUser', async (req, res) => {
 
         // create and send new access token
         const accessToken = generateAccessToken(user._id, email, username);
-        return res.cookie('jwt', accessToken, {httpOnly: true, secure: true, maxAge: 2592000000})
+        return res.cookie('jwt', accessToken, {httpOnly: true, secure: true, maxAge: 2592000000, sameSite: "none"})
             .send({message: "User edited successfully"});
     } catch (err) {
         return res.status(400).send({message: "Error trying to update user"});

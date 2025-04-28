@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
 
     const accessToken = generateAccessToken(user._id, user.email, user.username);
 
-    return res.cookie('jwt', accessToken, {httpOnly: true, secure: true, maxAge: 2592000000})
+    return res.cookie('jwt', accessToken, {httpOnly: true, secure: true, maxAge: 2592000000, sameSite: "none"})
         .send({message: "Logged in successfully"});
 });
 
