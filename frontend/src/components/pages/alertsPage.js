@@ -1,48 +1,34 @@
-import { useEffect, useState, useContext } from "react";
-import { Form } from "react-bootstrap";
-import './alertsPage.css';
-import {ThemeContext, UserContext} from "../../App";
+import {useContext, useEffect, useState} from "react";
+import {Form} from "react-bootstrap";
+import '../../css/alertsPage.css';
+import axios from "axios";
+import {ThemeContext} from "../../App";
 
 function AlertsPage() {
     const [alerts, setAlerts] = useState([]);
-    const [filteredAlerts, setFilteredAlerts] = useState([]);
-    const [alertSeverity, setAlertSeverity] = useState("");
-    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
+    const {darkTheme} = useContext(ThemeContext);
 
     useEffect(() => {
         fetchAlerts();
     }, []);
 
-    async function fetchAlerts() {
-        try {
-            const response = await fetch("http://localhost:8081/api/alerts");
-            const data = await response.json();
-            setAlerts(data.data);
-            setFilteredAlerts(data.data);
-        } catch (error) {
-            console.error("Failed to fetch alerts:", error);
-        }
+    function fetchAlerts(severity) {
+        (async () => {
+            const alerts = await axios.get(`${process.env.REACT_APP_BACKEND_SERVER_URI}/api/alerts/${severity}`);
+            setAlerts(alerts.data.data);
+        })();
     }
 
     function handleSeverityChange(event) {
-        const severity = event.target.value;
-        setAlertSeverity(severity);
-
-        if (severity === "") {
-            setFilteredAlerts(alerts);
-        } else {
-            setFilteredAlerts(alerts.filter(alert => alert.attributes.severity === parseInt(severity)));
-        }
+        fetchAlerts(event.currentTarget.value);
     }
 
     return (
-        <div className="alerts-page-container" data-bs-theme={darkTheme?"dark":"light"}>
+        <div className="alerts-page-container" data-bs-theme={darkTheme ? "dark" : "light"}>
             <div className="dropdown-container">
                 <Form.Select
-                    className="form-select no-round-corner"
-                    onChange={handleSeverityChange}
-                    value={alertSeverity}
-                >
+                    className="no-round-corner"
+                    onChange={handleSeverityChange}>
                     <option value="">All Severities</option>
                     <option value="1">Severe</option>
                     <option value="2">Major</option>
@@ -52,10 +38,10 @@ function AlertsPage() {
             </div>
 
             <div className="alerts-container">
-                {filteredAlerts.length === 0 ? (
+                {alerts.length === 0 ? (
                     <div className="no-alerts">No alerts found.</div>
                 ) : (
-                    filteredAlerts.map(alert => (
+                    alerts.map(alert => (
                         <div key={alert.id} className="alert-item">
                             <div className="alert-box">
                                 <h5 className="alert-header">{alert.attributes.header || "No Title"}</h5>
