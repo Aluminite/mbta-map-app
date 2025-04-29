@@ -8,18 +8,18 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import getUserData from "../../utilities/getUserData";
-import {UserContext} from "../../App";
+import {UserContext, ThemeContext} from "../../App";
 
 const PrivateUserProfile = () => {
     const [show, setShow] = useState(false);
     const {user, setUser} = useContext(UserContext);
+    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const navigate = useNavigate();
     const editUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/editUser`;
     const themeUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/darkTheme`;
     const [form, setFormValues] = useState({username: "", email: "", password: ""});
-    const [darkThemeValue, setDarkThemeValue] = useState(user?.darkTheme ? "true" : "false");
     const [errors, setErrors] = useState({});
 
     // handle logout button
@@ -91,7 +91,6 @@ const PrivateUserProfile = () => {
 
     async function handleThemeSubmit(event) {
         event.preventDefault();
-        const darkTheme = darkThemeValue === "true";
         try {
             await axios.post(themeUrl, {"darkTheme": darkTheme}, {withCredentials: true});
             window.alert("Default theme updated successfully!");
@@ -160,7 +159,7 @@ const PrivateUserProfile = () => {
                             <Row>
                                 <Col>
                                     <Button variant="primary" type="submit" onClick={handleEditSubmit}>
-                                        Submit
+                                        Save
                                     </Button>
                                 </Col>
 
@@ -175,11 +174,12 @@ const PrivateUserProfile = () => {
                     </Card.Body>
                 </Card>
                 <Card color="success" className="my-2 mx-auto" style={{width: '30rem'}}>
-                    <Card.Title>Default Theme</Card.Title>
+                    <Card.Title>Theme</Card.Title>
                     <Card.Body>
                         <Form>
                             <Form.Group className="mb-3">
-                            <Form.Select id="darkTheme" value={darkThemeValue} onChange={(e) => setDarkThemeValue(e.target.value)}>
+                            <Form.Select id="darkTheme" value={darkTheme}
+                                         onChange={(e) => setDarkTheme(e.target.value === "true")}>
                                     <option value="false">Light Theme</option>
                                     <option value="true">Dark Theme</option>
                                 </Form.Select>
@@ -187,7 +187,7 @@ const PrivateUserProfile = () => {
                             <Row>
                                 <Col>
                                     <Button variant="primary" type="submit" onClick={handleThemeSubmit}>
-                                        Submit
+                                        Set Default
                                     </Button>
                                 </Col>
 

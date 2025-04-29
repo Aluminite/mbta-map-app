@@ -9,7 +9,7 @@ function AlertsPage() {
     const {darkTheme} = useContext(ThemeContext);
 
     useEffect(() => {
-        fetchAlerts();
+        fetchAlerts("");
     }, []);
 
     function fetchAlerts(severity) {
