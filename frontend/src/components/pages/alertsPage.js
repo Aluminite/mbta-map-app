@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Form } from "react-bootstrap";
 import './alertsPage.css';
+import {ThemeContext, UserContext} from "../../App";
 
 function AlertsPage() {
     const [alerts, setAlerts] = useState([]);
     const [filteredAlerts, setFilteredAlerts] = useState([]);
     const [alertSeverity, setAlertSeverity] = useState("");
+    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
 
     useEffect(() => {
         fetchAlerts();
@@ -34,7 +36,7 @@ function AlertsPage() {
     }
 
     return (
-        <div className="alerts-page-container">
+        <div className="alerts-page-container" data-bs-theme={darkTheme?"dark":"light"}>
             <div className="dropdown-container">
                 <Form.Select
                     className="form-select no-round-corner"
