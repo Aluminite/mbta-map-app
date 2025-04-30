@@ -25,13 +25,15 @@ router.post('/new', async (req, res) => {
         return res.status(400).send({message: "User not found"});
     }
 
-    const {route, station} = req.body;
+    const {route, routeName, station, stationName} = req.body;
 
     // creates a new favorite
     const createFavorite = new favoriteModel({
         ownerId: ownerId,
         route: route,
+        routeName: routeName,
         station: station,
+        stationName: stationName
     });
 
     try {

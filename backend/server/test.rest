@@ -58,7 +58,9 @@ Content-Type: application/json
 
 {
   "route": "CR-Newburyport",
-  "station": "place-ER-0168"
+  "routeName": "Commuter Rail: Newburyport/Rockport Line",
+  "station": "place-ER-0168",
+  "stationName": "Salem"
 }
 
 ###

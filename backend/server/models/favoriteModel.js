@@ -13,9 +13,19 @@ const favoriteSchema = new mongoose.Schema(
             required: true,
             label: "route",
         },
+        routeName: {
+            type: String,
+            required: true,
+            label: "routeName",
+        },
         station: {
             type: String,
             label: "station",
+        },
+        stationName: {
+            type: String,
+            label: "stationName",
+            required: () => {return this.station === undefined}
         },
         date: {
             type: Date,
