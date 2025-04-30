@@ -36,9 +36,9 @@ const App = () => {
 
     return (
         <>
-            <Navbar/>
             <UserContext.Provider value={{user, setUser}}>
                 <ThemeContext.Provider value={{darkTheme, setDarkTheme}}>
+                    <Navbar/>
                     <Routes>
                         <Route exact path="/" element={<MbtaMap/>}/>
                         <Route exact path="/login" element={<Login/>}/>
