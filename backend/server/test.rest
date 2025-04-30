@@ -62,7 +62,7 @@ Content-Type: application/json
 }
 
 ###
-GET  http://localhost:8081/favorites/680db66def89911f2821c0c3
+GET  http://localhost:8081/favorites/68123be7147a4c26584bf462/68123bf5147a4c26584bf466
 Content-Type: application/json
 
 ###

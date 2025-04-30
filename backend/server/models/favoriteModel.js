@@ -10,6 +10,7 @@ const favoriteSchema = new mongoose.Schema(
         },
         route: {
             type: String,
+            required: true,
             label: "route",
         },
         station: {

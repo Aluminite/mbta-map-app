@@ -4,9 +4,10 @@ const favoriteModel = require("../models/favoriteModel");
 const {authenticateToken} = require("../utilities/authenticateToken");
 const mongoose = require("mongoose");
 
-// GET /favorites/:favoriteID
+// GET /favorites/*favoriteID
+// Can specify multiple IDs separated by slash.
 // JWT must be in the cookie "jwt".
-router.get("/:favoriteId", async (req, res) => {
+router.get("/*favoriteIds", async (req, res) => {
     // authenticate the user
     let decodedToken = null;
     try {
@@ -15,19 +16,15 @@ router.get("/:favoriteId", async (req, res) => {
         // The authenticate function will always throw an error if authentication doesn't succeed
         return res.status(401).send({message: "Authentication failed"});
     }
-    const ownerId = decodedToken.id;
-    const {favoriteId} = req.params;
+    const ownerId = new mongoose.Types.ObjectId(decodedToken.id);
+    const {favoriteIds} = req.params;
 
     try {
-        const favorite = await favoriteModel.findById(favoriteId);
-        if (favorite === null) {
+        const favorites = await favoriteModel.find({'_id': {$in: favoriteIds}, ownerId: ownerId});
+        if (favorites.length === 0) {
             return res.status(400).send({message: "favorite does not exist."});
         }
-        if (favorite.ownerId.equals(new mongoose.Types.ObjectId(ownerId))) {
-            return res.json(favorite);
-        } else {
-            return res.status(403).send({message: "This is not your favorite."});
-        }
+        return res.json(favorites);
     } catch (error) {
         return res.status(400).send({message: "Error trying to delete favorite"});
     }
