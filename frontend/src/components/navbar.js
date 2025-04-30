@@ -10,11 +10,10 @@ export default function Navbar() {
         <ReactNavbar bg="dark" variant="dark">
             <Container>
                 <Nav className="me-auto">
-                    <Link to="/" className="nav-link">Start</Link>
-                    <Link to="/home" className="nav-link">Home</Link>
+                    <Link to="/" className="nav-link">Map</Link>
+                    <Link to="/login" className="nav-link">Login</Link>
                     <Link to="/privateUserProfile" className="nav-link">Profile</Link>
                     <Link to="/alerts" className="nav-link">Alerts</Link>
-                    <Link to="/map" className="nav-link">Map</Link>
                 </Nav>
             </Container>
         </ReactNavbar>
