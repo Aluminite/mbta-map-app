@@ -282,7 +282,9 @@ const MbtaMap = () => {
         routeChange(favorite.route);
         if (favorite.station !== undefined) {
             // station favorite
-            leafletMap.current.setView(favorite.stationLatLng, 16);
+            if (leafletMap.current !== null) {
+                leafletMap.current.setView(favorite.stationLatLng, 16);
+            }
         }
     }
 
