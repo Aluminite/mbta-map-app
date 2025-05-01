@@ -1,35 +1,37 @@
 const mongoose = require("mongoose");
 
-//user schema/model
 const favoriteSchema = new mongoose.Schema(
     {
         ownerId: {
             type: mongoose.Types.ObjectId,
-            required: true,
-            label: "ownerId",
+            required: true
         },
         route: {
             type: String,
-            required: true,
-            label: "route",
+            required: true
         },
         routeName: {
             type: String,
-            required: true,
-            label: "routeName",
+            required: true
         },
         station: {
-            type: String,
-            label: "station",
+            type: String
+        },
+        stationLatLng: {
+            type: [Number],
+            required: function () {
+                return this.station !== undefined;
+            }
         },
         stationName: {
             type: String,
-            label: "stationName",
-            required: () => {return this.station === undefined}
+            required: function () {
+                return this.station !== undefined;
+            }
         },
         date: {
             type: Date,
-            default: Date.now,
+            default: Date.now
         },
     },
     {collection: "favorites"}

@@ -27,7 +27,7 @@ Content-Type: application/json
 {
   "username": "Short",
   "email": "notanemail",
-  "password": "tooshort"
+  "password": "short"
 }
 
 ###
@@ -58,8 +58,21 @@ Content-Type: application/json
 
 {
   "route": "CR-Newburyport",
-  "routeName": "Commuter Rail: Newburyport/Rockport Line",
+  "routeName": "Newburyport/Rockport Line"
+}
+
+###
+POST http://localhost:8081/favorites/new
+Content-Type: application/json
+
+{
+  "route": "CR-Newburyport",
+  "routeName": "Newburyport/Rockport Line",
   "station": "place-ER-0168",
+  "stationLatLng": [
+    42.524792,
+    -70.895876
+  ],
   "stationName": "Salem"
 }
 
@@ -68,7 +81,7 @@ GET  http://localhost:8081/favorites/68123be7147a4c26584bf462/68123bf5147a4c2658
 Content-Type: application/json
 
 ###
-DELETE http://localhost:8081/favorites/680db66def89911f2821c0c3
+DELETE http://localhost:8081/favorites/68125a03402d9941df3cd550
 Content-Type: application/json
 
 ### Get vehicles for a route
