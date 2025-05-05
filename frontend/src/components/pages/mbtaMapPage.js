@@ -1,37 +1,35 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import {useMap} from "@uidotdev/usehooks";
-import {Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap as useLeafletMap} from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import '../../css/mbtaMapPage.css';
 import axios from "axios";
-import Form from 'react-bootstrap/Form';
-import {ToggleButton} from "react-bootstrap";
-import {decode} from "@googlemaps/polyline-codec";
-import {generateHeadingIcon, generateVehicleIcon} from '../../utilities/icons';
 import leaflet from 'leaflet';
+import {Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap as useLeafletMap} from 'react-leaflet';
 import {LocateControl} from "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
-import {ThemeContext, UserContext} from "../../App";
-import getFavorites from "../../utilities/getFavorites";
+import 'leaflet/dist/leaflet.css';
+import '../../css/mbtaMapPage.css';
+import {ToggleButton} from "react-bootstrap";
+import Form from 'react-bootstrap/Form';
 import Button from "react-bootstrap/Button";
+import {decode} from "@googlemaps/polyline-codec";
+import getFavorites from "../../utilities/getFavorites";
+import {generateHeadingIcon, generateVehicleIcon} from '../../utilities/icons';
+import {ThemeContext, UserContext} from "../../App";
 
 const MbtaMap = () => {
+    const {user} = useContext(UserContext);
+    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
+    const leafletMap = useRef(null);
+    const [favorites, setFavorites] = useState([]);
     const [transitRoutes, setTransitRoutes] = useState([]);
-    const [routeVehicles, setRouteVehicles] = useState([]);
-    const [route, setRoute] = useState("");
-    const [routeFilter, setRouteFilter] = useState("");
+    const [routeFilter, setRouteFilter] = useState("none");
+    const [displayedRoute, setDisplayedRoute] = useState("");
     const selectedRoute = useRef(null);
-    const [routeStops, setRouteStops] = useState([]);
-    const [routeStopChildren, setRouteStopChildren] = useState([]);
+    const [routeVehicles, setRouteVehicles] = useState([]);
+    const [routeStops, setRouteStops] = useState({data: [], included: []});
     const stopPredictions = useMap();
     const [currentColor, setCurrentColor] = useState({color: "#FFFFFF"});
     const [currentVehicleIcon, setCurrentVehicleIcon] = useState(leaflet.divIcon());
     const [currentPolyline, setCurrentPolyline] = useState([]);
-    const {user} = useContext(UserContext);
-    const {darkTheme, setDarkTheme} = useContext(ThemeContext);
-    const [favorites, setFavorites] = useState([]);
-    const leafletMap = useRef(null);
-
 
     useEffect(() => {
         getRoutes();
@@ -81,8 +79,24 @@ const MbtaMap = () => {
         })();
     }
 
+    function routeFriendlyName(route) {
+        switch (route.attributes["type"]) {
+            case 0:
+            case 1:
+                return "Subway: " + route.attributes["long_name"];
+            case 2:
+                return "Commuter Rail: " + route.attributes["long_name"];
+            case 3:
+                return "Bus: " + route.attributes["short_name"] + " - " + route.attributes["long_name"];
+            case 4:
+                return "Ferry: " + route.attributes["long_name"];
+            default:
+                return "";
+        }
+    }
+
     function routeChange(newRoute) {
-        setRoute(newRoute);
+        setDisplayedRoute(newRoute);
         selectedRoute.current = transitRoutes.find((route) => route.id === newRoute);
         setCurrentPolyline([]);
         updateRouteVehicles(selectedRoute.current);
@@ -142,11 +156,10 @@ const MbtaMap = () => {
                 const stops = await axios.get(
                     `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/stops/${currentServiceDate()}/${route.id}`
                 );
-                setRouteStops(stops.data.data);
-                setRouteStopChildren(stops.data.included);
+                setRouteStops(stops.data);
             })();
         } else {
-            setRouteStops([]);
+            setRouteStops({data: [], included: []});
         }
     }
 
@@ -205,19 +218,13 @@ const MbtaMap = () => {
     }
 
     function findRealStop(stopID) {
-        // Due to race conditions, one of the states might be currently undefined
-        // Checking to avoid an exception
-        if (routeStops === undefined || routeStopChildren === undefined) {
-            return null;
-        }
-
-        let foundStop = routeStops.find((stop) => stop.id === stopID);
+        let foundStop = routeStops.data.find((stop) => stop.id === stopID);
         if (foundStop !== undefined) {
             return foundStop;
         } else {
-            foundStop = routeStopChildren.find((stop) => stop.id === stopID);
+            foundStop = routeStops.included.find((stop) => stop.id === stopID);
             if (foundStop !== undefined) {
-                const parent = routeStops.find((stop) => stop.id === foundStop.relationships.parent_station.data.id);
+                const parent = routeStops.data.find((stop) => stop.id === foundStop.relationships.parent_station.data.id);
                 if (parent !== undefined) {
                     return parent;
                 } else return null;
@@ -278,11 +285,12 @@ const MbtaMap = () => {
             return;
         }
         const favorite = favorites.find((favorite) => favorite._id === dropdown.value);
-        setRouteFilter("");
+        setRouteFilter("none");
         routeChange(favorite.route);
         if (favorite.station !== undefined) {
             // station favorite
             if (leafletMap.current !== null) {
+                leafletMap.current.closePopup();
                 leafletMap.current.setView(favorite.stationLatLng, 16);
             }
         }
@@ -302,7 +310,7 @@ const MbtaMap = () => {
                 </Form.Select>
                 <Form.Select className="no-round-corner"
                              onChange={(event) => routeChange(event.currentTarget.value)}
-                             value={route}>
+                             value={displayedRoute}>
                     <option value="">Choose Route</option>
                     {transitRoutes.filter(route => {
                         switch (routeFilter) {
@@ -317,30 +325,11 @@ const MbtaMap = () => {
                             default:
                                 return true;
                         }
-                    }).map(route => {
-                        let name = "";
-                        switch (route.attributes["type"]) {
-                            case 0:
-                            case 1:
-                                name = "Subway: " + route.attributes["long_name"];
-                                break;
-                            case 2:
-                                name = "Commuter Rail: " + route.attributes["long_name"];
-                                break;
-                            case 3:
-                                name = "Bus: " + route.attributes["short_name"] + " - " + route.attributes["long_name"];
-                                break;
-                            case 4:
-                                name = "Ferry: " + route.attributes["long_name"];
-                                break;
-                            default:
-                        }
-                        return (
-                            <option key={route.id} value={route.id}>
-                                {name}
-                            </option>
-                        );
-                    })}
+                    }).map(route =>
+                        <option key={route.id} value={route.id}>
+                            {routeFriendlyName(route)}
+                        </option>
+                    )}
                 </Form.Select>
                 {// Route favorite button, only shows if signed in, a route is selected, and route is not favorited
                     (user !== null && selectedRoute.current != null && favorites.find(favorite =>
@@ -350,17 +339,18 @@ const MbtaMap = () => {
                                     addFavoriteRoute(selectedRoute.current.id, selectedRoute.current.attributes.long_name)}>
                             ⭐
                         </Button> : null}
-                {favorites.length === 0 ? null :
-                    <Form.Select className="no-round-corner" onChange={handleFavoriteSelect}>
-                        <option value="">Select Favorite</option>
-                        {favorites.map((favorite) =>
-                            <option key={favorite._id} value={favorite._id}>
-                                {favorite.stationName !== undefined ? favorite.stationName + " (" : null}
-                                {favorite.routeName}
-                                {favorite.stationName !== undefined ? ")" : null}
-                            </option>
-                        )}
-                    </Form.Select>}
+                {// Favorites only shows if there's at least 1
+                    favorites.length > 0 ?
+                        <Form.Select className="no-round-corner" onChange={handleFavoriteSelect}>
+                            <option value="">Select Favorite</option>
+                            {favorites.map((favorite) =>
+                                <option key={favorite._id} value={favorite._id}>
+                                    {favorite.stationName !== undefined ? favorite.stationName + " (" : null}
+                                    {favorite.routeName}
+                                    {favorite.stationName !== undefined ? ")" : null}
+                                </option>
+                            )}
+                        </Form.Select> : null}
                 <ToggleButton className="no-round-corner" id="dark-theme" value="1" type="checkbox"
                               variant={darkTheme ? "light" : "dark"} checked={darkTheme} onChange={handleThemeChange}>
                     {(darkTheme ? "Light" : "Dark")}
@@ -377,7 +367,7 @@ const MbtaMap = () => {
                             minZoom={8}
                         />
                         <Polyline pathOptions={currentColor} positions={currentPolyline} interactive={false}/>
-                        {routeStops.map(stop => {
+                        {routeStops.data.map(stop => {
                             let direction0Prediction = null;
                             let direction1Prediction = null;
                             if (stopPredictions.has(stop.id)) {
@@ -429,11 +419,12 @@ const MbtaMap = () => {
                                         findPolyline(vehicle.relationships.trip.data.id);
                                     },
                                 }}>
-                                    {vehicle.attributes.bearing != null ?
-                                        <Marker // The API returns null for the bearing sometimes, so we need to check
-                                            position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
-                                            icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color, darkTheme)}
-                                            interactive={false}/> : null}
+                                    {// The API returns null for the bearing sometimes, so we need to check
+                                        vehicle.attributes.bearing != null ?
+                                            <Marker
+                                                position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
+                                                icon={generateHeadingIcon(vehicle.attributes.bearing, currentColor.color, darkTheme)}
+                                                interactive={false}/> : null}
                                     <Popup>
                                         Vehicle {vehicle.attributes.label}<br/>
                                         {status} {realStopName}
