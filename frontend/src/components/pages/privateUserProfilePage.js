@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useEffect} from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import {useNavigate} from "react-router-dom";
@@ -9,6 +9,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import getUserData from "../../utilities/getUserData";
 import {UserContext, ThemeContext} from "../../App";
+import getFavorites from "../../utilities/getFavorites";
 
 const PrivateUserProfile = () => {
     const [show, setShow] = useState(false);
@@ -21,6 +22,8 @@ const PrivateUserProfile = () => {
     const themeUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/darkTheme`;
     const [form, setFormValues] = useState({username: "", email: "", password: ""});
     const [errors, setErrors] = useState({});
+    const [favorites, setFavorites] = useState([]);
+    const [selectedFavoriteId, setSelectedFavoriteId] = useState("");
 
     // handle logout button
     function handleLogout() {
@@ -103,6 +106,28 @@ const PrivateUserProfile = () => {
             window.alert("Failed to set default theme");
         }
     }
+    
+    async function deleteFavoriteRoute(favoriteId) {
+        try {
+            await axios.delete(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/${favoriteId}`, {
+                withCredentials: true
+            });
+            const favoritesData = await getFavorites(user);
+            setFavorites(favoritesData.filter(favorite => favorite.route));
+            setSelectedFavoriteId("");
+        } catch (error) {
+            console.error("Failed to delete favorite route:", error);
+        }
+    }
+    
+    
+    useEffect(() => {
+        if (user !== null) {
+            (async () => {
+                setFavorites(await getFavorites(user));
+            })();
+        }
+    }, [user]);        
 
     // handle cancel button
     function handleCancel() {
@@ -111,7 +136,7 @@ const PrivateUserProfile = () => {
 
     if (!user) return (<div><h4>Log in to view this page.</h4></div>);
     else return (
-        <div className="container">
+        <div className="alerts-page-container" data-bs-theme={darkTheme ? "dark" : "light"}>
             <div className="col-md-12 text-center">
                 <h1>{user.username}</h1>
                 <Card color="success" className="my-2 mx-auto" style={{width: '30rem'}}>
@@ -174,6 +199,7 @@ const PrivateUserProfile = () => {
                         </Form>
                     </Card.Body>
                 </Card>
+                
                 <Card color="success" className="my-2 mx-auto" style={{width: '30rem'}}>
                     <Card.Title>Theme</Card.Title>
                     <Card.Body>
@@ -198,10 +224,68 @@ const PrivateUserProfile = () => {
                                     </Button>
                                 </Col>
                             </Row>
-
                         </Form>
                     </Card.Body>
                 </Card>
+                        <Card color="success" className="my-2 mx-auto" style={{width: '30rem'}}>
+                            <Card.Title>Favorite Routes</Card.Title>
+                            <Card.Body>
+                                <Form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (selectedFavoriteId) {
+                                        deleteFavoriteRoute(selectedFavoriteId);
+                                    }
+                                }}>
+                                <Form.Group className="mb-3">
+                                    <Form.Select
+                                        aria-label="Favorite route select"
+                                        className="mt-2"
+                                        onChange={(e) => setSelectedFavoriteId(e.target.value)}
+                                        value={selectedFavoriteId}
+                                    >
+                                        <option value="">Select route to delete</option>
+                                        {favorites.map((favorite) => (
+                                            <option key={favorite._id} value={favorite._id}>
+                                                {favorite.stationName !== undefined ? favorite.stationName + " (" : ""}
+                                                {favorite.routeName}
+                                                {favorite.stationName !== undefined ? ")" : null}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+
+                                {selectedFavoriteId && (() => {
+                                    const selectedFavorite = favorites.find(favorite => favorite._id === selectedFavoriteId);
+                                    return (
+                                        <div className="mb-3">
+                                            <strong>Selected Route:</strong>{" "}
+                                            {selectedFavorite &&
+                                                <>
+                                                    {selectedFavorite.stationName !== undefined ? selectedFavorite.stationName + " (" : ""}
+                                                    {selectedFavorite.routeName}
+                                                    {selectedFavorite.stationName !== undefined ? ")" : null}
+                                                </>
+                                            }
+                                        </div>
+                                    );
+                                })()}
+
+                                <Row>
+                                    <Col>
+                                        <Button variant="primary" type="submit" disabled={!selectedFavoriteId}>
+                                            Delete Route
+                                        </Button>
+                                    </Col>
+                                    <Col>
+                                        <Button variant="secondary" type="button" onClick={() => setSelectedFavoriteId("")}>
+                                            Cancel
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+
                 <div className="col-md-12 text-center">
                     <>
                         <Button className="me-2" onClick={handleShow}>
