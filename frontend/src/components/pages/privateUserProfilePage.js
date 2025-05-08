@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from "react";
+import React, {useState, useContext} from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import {useNavigate} from "react-router-dom";
@@ -8,13 +8,13 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import getUserData from "../../utilities/getUserData";
-import {UserContext, ThemeContext} from "../../App";
-import getFavorites from "../../utilities/getFavorites";
+import {UserContext, ThemeContext, FavoritesContext} from "../../App";
 
 const PrivateUserProfile = () => {
     const [show, setShow] = useState(false);
     const {user, setUser} = useContext(UserContext);
     const {darkTheme, setDarkTheme} = useContext(ThemeContext);
+    const {favorites, setFavorites} = useContext(FavoritesContext);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const navigate = useNavigate();
@@ -22,7 +22,6 @@ const PrivateUserProfile = () => {
     const themeUrl = `${process.env.REACT_APP_BACKEND_SERVER_URI}/user/darkTheme`;
     const [form, setFormValues] = useState({username: "", email: "", password: ""});
     const [errors, setErrors] = useState({});
-    const [favorites, setFavorites] = useState([]);
     const [selectedFavoriteId, setSelectedFavoriteId] = useState("");
 
     // handle logout button
@@ -112,22 +111,12 @@ const PrivateUserProfile = () => {
             await axios.delete(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/${favoriteId}`, {
                 withCredentials: true
             });
-            const favoritesData = await getFavorites(user);
-            setFavorites(favoritesData.filter(favorite => favorite.route));
+            setFavorites(favorites.filter(favorite => favorite._id !== favoriteId));
             setSelectedFavoriteId("");
         } catch (error) {
             console.error("Failed to delete favorite route:", error);
         }
     }
-    
-    
-    useEffect(() => {
-        if (user !== null) {
-            (async () => {
-                setFavorites(await getFavorites(user));
-            })();
-        }
-    }, [user]);        
 
     // handle cancel button
     function handleCancel() {
@@ -233,7 +222,7 @@ const PrivateUserProfile = () => {
                                 <Form onSubmit={(e) => {
                                     e.preventDefault();
                                     if (selectedFavoriteId) {
-                                        deleteFavoriteRoute(selectedFavoriteId);
+                                        void deleteFavoriteRoute(selectedFavoriteId);
                                     }
                                 }}>
                                 <Form.Group className="mb-3">

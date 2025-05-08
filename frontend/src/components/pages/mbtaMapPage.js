@@ -11,15 +11,14 @@ import {ToggleButton} from "react-bootstrap";
 import Form from 'react-bootstrap/Form';
 import Button from "react-bootstrap/Button";
 import {decode} from "@googlemaps/polyline-codec";
-import getFavorites from "../../utilities/getFavorites";
 import {generateHeadingIcon, generateVehicleIcon} from '../../utilities/icons';
-import {ThemeContext, UserContext} from "../../App";
+import {FavoritesContext, ThemeContext, UserContext} from "../../App";
 
 const MbtaMap = () => {
     const {user} = useContext(UserContext);
     const {darkTheme, setDarkTheme} = useContext(ThemeContext);
+    const {favorites, setFavorites} = useContext(FavoritesContext);
     const leafletMap = useRef(null);
-    const [favorites, setFavorites] = useState([]);
     const [transitRoutes, setTransitRoutes] = useState([]);
     const [routeFilter, setRouteFilter] = useState("none");
     const [displayedRoute, setDisplayedRoute] = useState("");
@@ -42,14 +41,6 @@ const MbtaMap = () => {
             clearInterval(interval);
         };
     }, []);
-
-    useEffect(() => {
-        if (user !== null) {
-            (async () => {
-                setFavorites(await getFavorites(user));
-            })();
-        }
-    }, [user]);
 
     function LeafletMapGetter() {
         const map = useLeafletMap();
