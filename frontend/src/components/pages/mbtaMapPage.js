@@ -31,10 +31,10 @@ const MbtaMap = () => {
     const [currentPolyline, setCurrentPolyline] = useState([]);
 
     useEffect(() => {
-        getRoutes();
+        void getRoutes();
 
         const interval = setInterval(() => {
-            updateRouteVehicles(selectedRoute.current);
+            void updateRouteVehicles(selectedRoute.current);
         }, 5000);
 
         return () => {
@@ -61,13 +61,11 @@ const MbtaMap = () => {
         leafletMap.current.addControl(control);
     }
 
-    function getRoutes() {
-        (async () => {
-            const routes = await axios.get(
-                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes`
-            );
-            setTransitRoutes(routes.data.data);
-        })();
+    async function getRoutes() {
+        const routes = await axios.get(
+            `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/routes`
+        );
+        setTransitRoutes(routes.data.data);
     }
 
     function routeFriendlyName(route) {
@@ -90,8 +88,8 @@ const MbtaMap = () => {
         setDisplayedRoute(newRoute);
         selectedRoute.current = transitRoutes.find((route) => route.id === newRoute);
         setCurrentPolyline([]);
-        updateRouteVehicles(selectedRoute.current);
-        getStops(selectedRoute.current);
+        void updateRouteVehicles(selectedRoute.current);
+        void getStops(selectedRoute.current);
         if (selectedRoute.current != null) {
             setCurrentColor({color: "#" + selectedRoute.current.attributes["color"]});
             setCurrentVehicleIcon(generateVehicleIcon(selectedRoute.current.attributes["type"],
@@ -99,30 +97,26 @@ const MbtaMap = () => {
         }
     }
 
-    function updateRouteVehicles(route) {
+    async function updateRouteVehicles(route) {
         if (route != null) {
-            (async () => {
-                const vehicles = await axios.get(
-                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/vehicles/${route.id}`
-                );
-                setRouteVehicles(vehicles.data.data);
-            })();
+            const vehicles = await axios.get(
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/vehicles/${route.id}`
+            );
+            setRouteVehicles(vehicles.data.data);
         } else {
             setRouteVehicles([]);
         }
     }
 
-    function findPolyline(tripID) {
-        (async () => {
-            const trip = await axios.get(
-                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/trips/${tripID}`
-            );
-            const shape = await axios.get(
-                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/shapes/${trip.data.data.relationships.shape.data.id}`
-            );
-            const decoded = decode(shape.data.data.attributes.polyline);
-            setCurrentPolyline(decoded);
-        })();
+    async function findPolyline(tripID) {
+        const trip = await axios.get(
+            `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/trips/${tripID}`
+        );
+        const shape = await axios.get(
+            `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/shapes/${trip.data.data.relationships.shape.data.id}`
+        );
+        const decoded = decode(shape.data.data.attributes.polyline);
+        setCurrentPolyline(decoded);
     }
 
     function currentServiceDate() {
@@ -141,27 +135,23 @@ const MbtaMap = () => {
         return `${year}-${month}-${day}`;
     }
 
-    function getStops(route) {
+    async function getStops(route) {
         if (route != null) {
-            (async () => {
-                const stops = await axios.get(
-                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/stops/${currentServiceDate()}/${route.id}`
-                );
-                setRouteStops(stops.data);
-            })();
+            const stops = await axios.get(
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/stops/${currentServiceDate()}/${route.id}`
+            );
+            setRouteStops(stops.data);
         } else {
             setRouteStops({data: [], included: []});
         }
     }
 
-    function getStopPredictions(stop, route) {
+    async function getStopPredictions(stop, route) {
         if (stop != null) {
-            (async () => {
-                const predictions = await axios.get(
-                    `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/predictions/${stop.id}/${route.id}`
-                );
-                stopPredictions.set(stop.id, predictions.data.data);
-            })();
+            const predictions = await axios.get(
+                `${process.env.REACT_APP_BACKEND_SERVER_URI}/api/predictions/${stop.id}/${route.id}`
+            );
+            stopPredictions.set(stop.id, predictions.data.data);
         }
     }
 
@@ -244,31 +234,27 @@ const MbtaMap = () => {
         }
     }
 
-    function addFavoriteStop(route, routeName, station, stationLatLng, stationName) {
-        (async () => {
-            const body = {
-                route: route,
-                routeName: routeName,
-                station: station,
-                stationLatLng: stationLatLng,
-                stationName: stationName
-            };
-            const newFavorite = await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/new`,
-                body, {withCredentials: true});
-            setFavorites(favorites.concat([newFavorite.data]));
-        })();
+    async function addFavoriteStop(route, routeName, station, stationLatLng, stationName) {
+        const body = {
+            route: route,
+            routeName: routeName,
+            station: station,
+            stationLatLng: stationLatLng,
+            stationName: stationName
+        };
+        const newFavorite = await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/new`,
+            body, {withCredentials: true});
+        setFavorites(favorites.concat([newFavorite.data]));
     }
 
-    function addFavoriteRoute(route, routeName) {
-        (async () => {
-            const body = {
-                route: route,
-                routeName: routeName
-            };
-            const newFavorite = await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/new`,
-                body, {withCredentials: true});
-            setFavorites(favorites.concat([newFavorite.data]));
-        })();
+    async function addFavoriteRoute(route, routeName) {
+        const body = {
+            route: route,
+            routeName: routeName
+        };
+        const newFavorite = await axios.post(`${process.env.REACT_APP_BACKEND_SERVER_URI}/favorites/new`,
+            body, {withCredentials: true});
+        setFavorites(favorites.concat([newFavorite.data]));
     }
 
     function handleFavoriteSelect({currentTarget: dropdown}) {
@@ -370,9 +356,7 @@ const MbtaMap = () => {
                                         center={[stop.attributes.latitude, stop.attributes.longitude]}
                                         pathOptions={{color: (darkTheme ? "#CCCCCC" : "#666666")}} radius={10}
                                         eventHandlers={{
-                                            click: () => {
-                                                getStopPredictions(stop, selectedRoute.current);
-                                            },
+                                            click: () => getStopPredictions(stop, selectedRoute.current)
                                         }}>
                                     <Popup>
                                         {stop.attributes.name}<br/>
@@ -380,12 +364,12 @@ const MbtaMap = () => {
                                         {direction1Prediction}<br/>
                                         {(user !== null &&
                                             favorites.find(favorite => favorite.station === stop.id) === undefined) ?
-                                            <Button size="sm" onClick={() => {
+                                            <Button size="sm" onClick={() =>
                                                 addFavoriteStop(selectedRoute.current.id,
                                                     selectedRoute.current.attributes.long_name, stop.id,
                                                     [stop.attributes.latitude, stop.attributes.longitude],
-                                                    stop.attributes.name);
-                                            }}>
+                                                    stop.attributes.name)
+                                            }>
                                                 Add to favorites
                                             </Button> : null}
                                     </Popup>
@@ -406,9 +390,7 @@ const MbtaMap = () => {
                                 <Marker key={vehicle.id}
                                         position={[vehicle.attributes.latitude, vehicle.attributes.longitude]}
                                         icon={currentVehicleIcon} eventHandlers={{
-                                    click: () => {
-                                        findPolyline(vehicle.relationships.trip.data.id);
-                                    },
+                                    click: () => findPolyline(vehicle.relationships.trip.data.id)
                                 }}>
                                     {// The API returns null for the bearing sometimes, so we need to check
                                         vehicle.attributes.bearing != null ?
